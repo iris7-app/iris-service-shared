@@ -31,7 +31,7 @@ metadata:
   name: default-deny-all
   namespace: app
   labels:
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
 spec:
   podSelector: {}              # empty selector = all pods in the namespace
   policyTypes:
@@ -45,7 +45,7 @@ metadata:
   name: default-deny-all
   namespace: infra
   labels:
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
 spec:
   podSelector: {}
   policyTypes:
@@ -106,7 +106,7 @@ spec:
         - protocol: TCP
           port: 53
 
-# ── 3. allow-port-forward-to-backend — kubectl → mirador:8080 ────────────────
+# ── 3. allow-port-forward-to-backend — kubectl → iris:8080 ────────────────
 # Replaces the former allow-ingress-to-backend. `kubectl port-forward` routes
 # traffic through the kubelet which appears as the node IP, NOT as a pod in
 # ingress-nginx. Allowing from everywhere in the cluster is acceptable
@@ -121,7 +121,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: mirador
+      app.kubernetes.io/name: iris
       app.kubernetes.io/component: backend
   policyTypes:
     - Ingress
@@ -145,7 +145,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: mirador
+      app.kubernetes.io/name: iris
       app.kubernetes.io/component: backend
   policyTypes:
     - Egress
@@ -246,7 +246,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: mirador
+      app.kubernetes.io/name: iris
       app.kubernetes.io/component: backend
   policyTypes:
     - Egress

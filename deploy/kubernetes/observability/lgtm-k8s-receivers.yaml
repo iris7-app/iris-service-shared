@@ -6,7 +6,7 @@
 # The `grafana/otel-lgtm` image ships an OTel Collector that only accepts
 # OTLP pushes from application code. It does NOT scrape kubelet / the
 # Kubernetes API server, so Mimir (its embedded Prometheus backend) has
-# zero cluster-wide metrics — only what Mirador itself emits.
+# zero cluster-wide metrics — only what Iris itself emits.
 #
 # This is the wrong shape for:
 #   - OpenLens "Metrics" tab (needs `container_cpu_usage_seconds_total`

@@ -253,7 +253,7 @@ the two with `diff -ur gke/ gke-prom/`.
 ### What's GKE-specific in `gke-prom/` (vs `local-prom/`)
 
 The two overlays share 90% of their YAML (same chart pin, same Operator
-+ ksm + node-exporter shape, same 6 ServiceMonitors, same Mirador
++ ksm + node-exporter shape, same 6 ServiceMonitors, same Iris
 ServiceMonitor, same NetworkPolicy extras, same Grafana datasource
 patch). The deltas:
 

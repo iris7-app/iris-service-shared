@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Install GitLab Agent for Kubernetes (mirador) into the demo GKE cluster.
+# Install GitLab Agent for Kubernetes (iris) into the demo GKE cluster.
 # Run AFTER: bin/cluster/demo/up.sh has finished + kubectl context is set.
 set -euo pipefail
 
-TOKEN_FILE="/tmp/gitlab-agent-mirador.token"
+TOKEN_FILE="/tmp/gitlab-agent-iris.token"
 [ -f "$TOKEN_FILE" ] || { echo "❌ token file missing: $TOKEN_FILE"; exit 1; }
 TOKEN="$(cat "$TOKEN_FILE")"
 
@@ -11,16 +11,16 @@ TOKEN="$(cat "$TOKEN_FILE")"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 # Switch kubectl to the new cluster
-gcloud container clusters get-credentials mirador-prod \
+gcloud container clusters get-credentials @@KEEP_IRIS_PROD@@ \
   --region europe-west1 \
   --project project-8d6ea68c-33ac-412b-8aa
 
-echo "▶️  Installing GitLab Agent 'mirador' via Helm…"
+echo "▶️  Installing GitLab Agent 'iris' via Helm…"
 helm repo add gitlab https://charts.gitlab.io 2>/dev/null || true
 helm repo update gitlab
 
-helm upgrade --install mirador gitlab/gitlab-agent \
-  --namespace gitlab-agent-mirador --create-namespace \
+helm upgrade --install iris gitlab/gitlab-agent \
+  --namespace gitlab-agent-iris --create-namespace \
   --set image.tag=v17.6.0 \
   --set config.token="$TOKEN" \
   --set config.kasAddress=wss://kas.gitlab.com
@@ -28,9 +28,9 @@ helm upgrade --install mirador gitlab/gitlab-agent \
 echo ""
 echo "▶️  Verifying Agent connection…"
 kubectl wait --for=condition=Available --timeout=180s \
-  deployment/mirador -n gitlab-agent-mirador
-kubectl get pods -n gitlab-agent-mirador
+  deployment/iris -n gitlab-agent-iris
+kubectl get pods -n gitlab-agent-iris
 
 echo ""
-echo "✅ Agent installed. Check https://gitlab.com/mirador1/mirador-service/-/clusters"
-echo "   Agent should appear as 'mirador' with status 'Connected' within ~30 s."
+echo "✅ Agent installed. Check https://gitlab.com/iris-7/iris-service/-/clusters"
+echo "   Agent should appear as 'iris' with status 'Connected' within ~30 s."

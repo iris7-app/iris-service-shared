@@ -1,6 +1,6 @@
 # ADR-0054 — Dual-export OTLP telemetry to GitLab Observability
 
-- **Status**: Active 2026-04-23 — mirador1 group (id 130289716) enabled
+- **Status**: Active 2026-04-23 — iris-7 group (id 130289716) enabled
   on GitLab Observability beta. Endpoint hardcoded as default in
   `otelcol-override.yaml`, overridable via `$GITLAB_OBSERVABILITY_ENDPOINT`
   for forks.
@@ -12,7 +12,7 @@
 
 ## Context
 
-Mirador's observability today runs on a **local LGTM stack** (Loki for
+Iris's observability today runs on a **local LGTM stack** (Loki for
 logs, Grafana for UI, Tempo for traces, Mimir for metrics) packaged as
 one Docker container (`grafana/otel-lgtm`). The OTel Collector
 (OpenTelemetry's vendor-neutral pipeline for traces/metrics/logs —
@@ -32,7 +32,7 @@ but it has **one sharp limit for a portfolio demo** :
   (ADR-0022) boots, emits traces for 20 min, then `demo-down` tears
   the whole LGTM container down. Nothing survives for async review.
 - The reviewer's own cloud footprint is irrelevant — they don't want
-  to pay anything to look at Mirador's telemetry.
+  to pay anything to look at Iris's telemetry.
 
 **GitLab Observability** (feature in public **beta** 2026, free during
 beta period per GitLab's UI banner) ships an OTLP ingest endpoint
@@ -52,7 +52,7 @@ Verified on activation 2026-04-23 :
    add `headers: Authorization: Bearer ${env:GITLAB_OBSERVABILITY_TOKEN}`
    to the exporter blocks.
 5. **CI/CD Observability too** — the same feature flag activates
-   GitLab-CI-pipeline telemetry export (separate from Mirador's app
+   GitLab-CI-pipeline telemetry export (separate from Iris's app
    telemetry). That's a bonus, not what this ADR is about.
 6. **UI surface** : traces / metrics / logs show up in the **group's
    sidebar** under Observability, no cluster to click into.
@@ -81,7 +81,7 @@ exporters:
   otlphttp/logs:     { endpoint: http://127.0.0.1:3100/otlp, ... }
 
   # GitLab Observability dual-sink. Hardcoded default endpoint for the
-  # mirador1 group ; `$GITLAB_OBSERVABILITY_ENDPOINT` env var overrides
+  # iris-7 group ; `$GITLAB_OBSERVABILITY_ENDPOINT` env var overrides
   # for forks that want their own group.
   otlphttp/traces-gitlab:
     endpoint: ${env:GITLAB_OBSERVABILITY_ENDPOINT:-https://130289716.otel.gitlab-o11y.com:14318}
@@ -96,7 +96,7 @@ service:
     logs:     { exporters: [otlphttp/logs, otlphttp/logs-gitlab] }
 ```
 
-**Activation out of the box** — the mirador1 group endpoint is
+**Activation out of the box** — the iris-7 group endpoint is
 hardcoded as the env-var default. Anyone cloning + running
 `./run.sh obs` automatically dual-exports to GitLab Observability
 without additional setup. Forks that want their own group's endpoint
@@ -108,17 +108,17 @@ remove the `otlphttp/*-gitlab` entries from the
 
 One-time user activation (once per group) :
 
-1. Visit <https://gitlab.com/groups/mirador1/-/observability/setup>
+1. Visit <https://gitlab.com/groups/iris-7/-/observability/setup>
    and click "Enable Observability" (or equivalent).
 2. GitLab provisions the endpoint and displays it in the UI
    (shape : `https://<group-id>.otel.gitlab-o11y.com:14318` for TLS
    HTTPS, or `:14317` for gRPCS).
 3. Beta doesn't require a token ; the group-id in the subdomain is
    the identifier. No `Authorization: Bearer` header needed.
-4. (Mirador repo only) Record the group-id in this ADR + the OTel
+4. (Iris repo only) Record the group-id in this ADR + the OTel
    Collector config. For forks, override via env var.
 
-Once active, every trace / metric / log Mirador emits lands in
+Once active, every trace / metric / log Iris emits lands in
 **BOTH** local LGTM (for offline review) AND GitLab's UI (for
 reviewers who don't want to boot a local cluster just to see the
 traces).
@@ -155,7 +155,7 @@ traces).
   Mitigated by ADR-0017's secret-rotation posture (6-month cadence,
   token stored in user's shell env, never in repo).
 - **Egress bandwidth** — every trace/metric/log gets one extra
-  HTTPS POST to `observability.gitlab.com`. Mirador's emission
+  HTTPS POST to `observability.gitlab.com`. Iris's emission
   volume is tiny (low tens of RPS at demo peak) so egress cost is
   < 1 GB/month → still free tier everywhere.
 
@@ -213,7 +213,7 @@ GitLab Observability for portfolio use.
 
 - GitLab Observability docs : <https://docs.gitlab.com/ee/operations/tracing.html>
 - GitLab group-level Observability setup :
-  <https://gitlab.com/groups/mirador1/-/observability/setup>
+  <https://gitlab.com/groups/iris-7/-/observability/setup>
 - [`infra/observability/otelcol-override.yaml`](../../infra/observability/otelcol-override.yaml)
   — scaffolded dual-export block (commented until user activates)
 - [`.env.example`](../../.env.example) — `GITLAB_OBSERVABILITY_*` vars

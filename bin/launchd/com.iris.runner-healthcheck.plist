@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  com.iris.runner-healthcheck.plist — every 5 min, verify the
+  gitlab-runner Docker container is up + the group runner reports
+  online from GitLab's perspective. Auto-restart on failure.
+
+  Why : the runner crashes silently (cache adapter, OOM, Docker
+  Desktop sleep). When it does, all 4 iris-7 pipelines stall
+  in `pending` indefinitely. This catches it in 5 min instead of
+  next time the user opens GitLab.
+
+  Install:
+    cp bin/launchd/com.iris.runner-healthcheck.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/com.iris.runner-healthcheck.plist
+
+  Remove:
+    launchctl unload -w ~/Library/LaunchAgents/com.iris.runner-healthcheck.plist
+    rm ~/Library/LaunchAgents/com.iris.runner-healthcheck.plist
+
+  Inspect:
+    launchctl list | grep com.iris.runner-healthcheck
+    cat /tmp/iris-runner-healthcheck.log
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.iris.runner-healthcheck</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-l</string>
+    <string>-c</string>
+    <string>cd /Users/benoitbesson/dev/workspace-modern/iris-service-java/infra/shared &amp;&amp; bin/dev/runner-healthcheck.sh --fix --quiet</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>300</integer>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/iris-runner-healthcheck.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/tmp/iris-runner-healthcheck.log</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

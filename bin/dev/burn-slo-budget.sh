@@ -53,8 +53,8 @@ done
 
 # ── Backend URL resolution ───────────────────────────────────────────────────
 case "$TARGET" in
-    java) BASE_URL="${MIRADOR_JAVA_URL:-http://localhost:8080}" ;;
-    python) BASE_URL="${MIRADOR_PYTHON_URL:-http://localhost:8080}" ;;
+    java) BASE_URL="${IRIS_JAVA_URL:-http://localhost:8080}" ;;
+    python) BASE_URL="${IRIS_PYTHON_URL:-http://localhost:8080}" ;;
     *) echo "Unknown target: $TARGET (use java or python)" ; exit 2 ;;
 esac
 
@@ -68,7 +68,7 @@ annotate() {
         return 0  # silent skip if Grafana not configured
     fi
     local payload
-    payload=$(printf '{"text":"%s","tags":["chaos-demo","mirador-slo"],"time":%d}' \
+    payload=$(printf '{"text":"%s","tags":["chaos-demo","iris-slo"],"time":%d}' \
         "$text" "$(($(date +%s) * 1000))")
     curl -sf -X POST -H "Authorization: Bearer $GRAFANA_TOKEN" \
         -H "Content-Type: application/json" \
@@ -101,4 +101,4 @@ fire "$BASE_URL/customers/diagnostic/kafka-timeout" "kafka-timeout" "$KAFKA_TIME
 
 echo ""
 echo "✓ Burn complete. Watch the SLO Overview dashboard recover over the next 5 min :"
-echo "  ${GRAFANA_URL:-http://localhost:3000}/d/mirador-slo-overview/slo-overview-mirador"
+echo "  ${GRAFANA_URL:-http://localhost:3000}/d/iris-slo-overview/slo-overview-iris"

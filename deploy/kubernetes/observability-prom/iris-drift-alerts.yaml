@@ -1,14 +1,14 @@
 # =============================================================================
-# deploy/kubernetes/observability-prom/mirador-drift-alerts.yaml
+# deploy/kubernetes/observability-prom/iris-drift-alerts.yaml
 #
 # Prometheus recording + alerting rules for the Customer Churn drift SLO
-# (Phase E of shared ADR-0061). Mirrors the pattern of mirador-alerts.yaml.
+# (Phase E of shared ADR-0061). Mirrors the pattern of iris-alerts.yaml.
 #
 # The drift signal comes from bin/ml/compute_drift.py running as a daily
 # CronJob (see ml-drift-cronjob.yaml in the same directory). The script
 # pushes one Prometheus gauge per feature to the Pushgateway :
 #
-#   mirador_churn_drift_ks_stat{feature, model}
+#   iris_churn_drift_ks_stat{feature, model}
 #
 # This file defines :
 #
@@ -28,37 +28,37 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: mirador-drift-alerts
+  name: iris-drift-alerts
   labels:
     release: prometheus-stack
     role: alert-rules
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
     app.kubernetes.io/component: ml-drift
 spec:
   groups:
     # ─────────────────────────────────────────────────────────────────────
     # Recording rules — pre-aggregate KS-stat across features.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.churn.drift.recording
+    - name: iris.churn.drift.recording
       interval: 30s
       rules:
-        - record: mirador:churn_drift:ks_stat:max
+        - record: iris:churn_drift:ks_stat:max
           # max across the 8 features per model — the model "drifts" as
           # soon as ONE feature crosses the threshold (per ADR-0061 §6).
           expr: |
-            max by (model) (mirador_churn_drift_ks_stat)
+            max by (model) (iris_churn_drift_ks_stat)
 
-        - record: mirador:churn_drift:ks_stat:p95
+        - record: iris:churn_drift:ks_stat:p95
           # Useful as a "general drift" signal without false-firing on a
           # single noisy feature.
           expr: |
-            quantile by (model) (0.95, mirador_churn_drift_ks_stat)
+            quantile by (model) (0.95, iris_churn_drift_ks_stat)
 
-        - record: mirador:churn_drift:freshness_seconds
+        - record: iris:churn_drift:freshness_seconds
           # Time since last drift push. The CronJob runs daily ; values
           # > 86 400 mean we missed at least one run.
           expr: |
-            time() - mirador_churn_drift_ks_stat_created
+            time() - iris_churn_drift_ks_stat_created
 
     # ─────────────────────────────────────────────────────────────────────
     # SLO recording rules — Sloth-style "drift-below-threshold success rate"
@@ -68,16 +68,16 @@ spec:
     # Over 30 days, we expect ≥ 99 % of samples to be "good"
     # (≤ 7 h of cumulative breach per month — realistic given the
     # CronJob runs daily, not minutely).
-    - name: mirador.churn.drift.slo
+    - name: iris.churn.drift.slo
       interval: 1m
       rules:
         - record: slo:sli_error:ratio_rate5m{slo="churn-drift"}
           expr: |
             (
-              count(mirador:churn_drift:ks_stat:max >= 0.20) or vector(0)
+              count(iris:churn_drift:ks_stat:max >= 0.20) or vector(0)
             )
             /
-            count(mirador:churn_drift:ks_stat:max)
+            count(iris:churn_drift:ks_stat:max)
           labels:
             slo: churn-drift
 
@@ -105,7 +105,7 @@ spec:
     # ─────────────────────────────────────────────────────────────────────
     # Alerts — multi-window multi-burn-rate per ADR-0058
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.churn.drift.alerts
+    - name: iris.churn.drift.alerts
       rules:
         # Page : 2 % of monthly budget burned in 1 h (fast incident).
         - alert: ChurnDriftBudgetBurnFast
@@ -125,7 +125,7 @@ spec:
               fast enough to consume 2 % of the 30-day error budget in 1 hour.
               Investigate the most-drifted features and decide whether to
               re-train or roll back the model. See runbook for triage steps.
-            runbook_url: "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+            runbook_url: "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
 
         # Page : 5 % in 6 h (sustained degradation).
         - alert: ChurnDriftBudgetBurnSustained
@@ -144,7 +144,7 @@ spec:
               Sustained drift over 6 hours has consumed 5 % of the monthly
               error budget. This is no longer a transient blip — the
               population has shifted relative to the training distribution.
-            runbook_url: "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+            runbook_url: "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
 
         # Ticket : 10 % in 1 d (deploy-related drift).
         - alert: ChurnDriftSlowErosion
@@ -162,7 +162,7 @@ spec:
               This often correlates with a code/data deploy ; check the
               recent training runs in MLflow for any change to feature
               engineering or label definition.
-            runbook_url: "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+            runbook_url: "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
 
         # Ticket : 10 % in 3 d (quiet baseline drift).
         - alert: ChurnDriftBaselineErosion
@@ -179,12 +179,12 @@ spec:
               Drift has quietly eroded 10 % of the monthly budget over 3 days.
               Indicates a slow population shift (seasonality, new customer
               segment) — schedule a re-training run in the next sprint.
-            runbook_url: "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+            runbook_url: "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
 
         # Freshness — ensure the CronJob actually runs.
         - alert: ChurnDriftStaleData
           expr: |
-            mirador:churn_drift:freshness_seconds > 129600
+            iris:churn_drift:freshness_seconds > 129600
           for: 30m
           labels:
             severity: warning
@@ -196,6 +196,6 @@ spec:
               The drift CronJob hasn't pushed metrics in over 36 hours
               (twice the daily cadence). The SLO can't be evaluated with
               stale data ; check the CronJob status with `kubectl get
-              cronjob -n mirador mirador-churn-drift` and look at the
+              cronjob -n iris iris-churn-drift` and look at the
               latest Job's logs.
-            runbook_url: "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+            runbook_url: "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"

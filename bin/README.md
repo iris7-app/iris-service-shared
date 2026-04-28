@@ -1,12 +1,12 @@
 # `bin/` — Operational scripts inventory (backend infra)
 
-Backend-infrastructure scripts for the [mirador1](https://gitlab.com/mirador1)
-project family. Submoduled into `mirador-service-java` and
-`mirador-service-python` under `infra/shared/bin/`. Run from the consuming
+Backend-infrastructure scripts for the [iris-7](https://gitlab.com/iris-7)
+project family. Submoduled into `iris-service-java` and
+`iris-service-python` under `infra/shared/bin/`. Run from the consuming
 repo's path : `infra/shared/bin/<group>/<script>.sh`.
 
 **Universal scripts** (release engineering, ADR drift, Renovate sync) live
-in [`mirador-common`](https://gitlab.com/mirador1/mirador-common) — see
+in [`iris-common`](https://gitlab.com/iris-7/iris-common) — see
 `infra/common/bin/...` for those. The split (2026-04-26) lets UI consume
 only the universal layer without pulling backend infra it doesn't need.
 
@@ -50,14 +50,14 @@ Cron-equivalent on macOS. Install with `launchctl load -w ~/Library/LaunchAgents
 
 | Plist | Wraps | Schedule |
 |---|---|---|
-| [`com.mirador.ovh-budget.plist`](launchd/com.mirador.ovh-budget.plist) | `bin/budget/ovh-alert.sh` | Daily 09:00 |
-| [`com.mirador.runner-healthcheck.plist`](launchd/com.mirador.runner-healthcheck.plist) | `bin/dev/runner-healthcheck.sh` | Every 5 min |
+| [`com.iris.ovh-budget.plist`](launchd/com.iris.ovh-budget.plist) | `bin/budget/ovh-alert.sh` | Daily 09:00 |
+| [`com.iris.runner-healthcheck.plist`](launchd/com.iris.runner-healthcheck.plist) | `bin/dev/runner-healthcheck.sh` | Every 5 min |
 
-## `ship/` — moved to `mirador-common` (2026-04-26)
+## `ship/` — moved to `iris-common` (2026-04-26)
 
 All release-engineering scripts (`pre-sync`, `changelog`, `gitlab-release`,
 `check-default-branch`, `renovate-sync`) + ADR regen tool moved into
-the universal [`mirador-common`](https://gitlab.com/mirador1/mirador-common) submodule.
+the universal [`iris-common`](https://gitlab.com/iris-7/iris-common) submodule.
 Call them from this repo via `infra/common/bin/ship/...` and `infra/common/bin/dev/regen-adr-index.sh`.
 
 ## Conventions

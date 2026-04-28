@@ -3,10 +3,10 @@
 **Status** : Accepted
 **Date** : 2026-04-26
 **Sibling repos** :
-- `mirador-service-java` — JPA entities under `com.mirador.{order,product}.*` ; migrations V7/V8/V9
-- `mirador-service-python` — SQLAlchemy 2.x async models under `src/mirador_service/{order,product}/` ; alembic 0002/0003/0004
-- `mirador-ui` — TypeScript interfaces in `core/api/api.service.ts` ; pages under `features/commerce/`
-- Tags : [java stable-v1.2.3](https://gitlab.com/mirador1/mirador-service-java/-/tags/stable-v1.2.3), [python stable-py-v0.6.4](https://gitlab.com/mirador1/mirador-service-python/-/tags/stable-py-v0.6.4), [ui stable-v1.1.3](https://gitlab.com/mirador1/mirador-ui/-/tags/stable-v1.1.3)
+- `iris-service-java` — JPA entities under `com.iris.{order,product}.*` ; migrations V7/V8/V9
+- `iris-service-python` — SQLAlchemy 2.x async models under `src/iris_service/{order,product}/` ; alembic 0002/0003/0004
+- `iris-ui` — TypeScript interfaces in `core/api/api.service.ts` ; pages under `features/commerce/`
+- Tags : [java stable-v1.2.3](https://gitlab.com/iris-7/iris-service-java/-/tags/stable-v1.2.3), [python stable-py-v0.6.4](https://gitlab.com/iris-7/iris-service-python/-/tags/stable-py-v0.6.4), [ui stable-v1.1.3](https://gitlab.com/iris-7/iris-ui/-/tags/stable-v1.1.3)
 
 ## Context
 
@@ -118,7 +118,7 @@ need more :
 | Async | virtual threads (Java 25 default) | `asyncpg` driver, `async def` endpoints |
 
 OpenAPI contract MUST be byte-identical between the 2 backends so the UI
-([mirador-ui](https://gitlab.com/mirador1/mirador-ui)) can switch
+([iris-ui](https://gitlab.com/iris-7/iris-ui)) can switch
 backends transparently via the `EnvService` flag.
 
 ## Invariants — property-test surface
@@ -161,9 +161,9 @@ Python) MUST verify :
 
 ## References
 
-- [Java foundation MR](https://gitlab.com/mirador1/mirador-service-java/-/merge_requests?scope=all&state=merged&search=feature%2Forder)
-- [Python foundation MR](https://gitlab.com/mirador1/mirador-service-python/-/merge_requests?scope=all&state=merged&search=feature%2Forder)
-- [UI Orders foundation MR !155](https://gitlab.com/mirador1/mirador-ui/-/merge_requests/155)
-- [Common ADR-0001 — polyrepo via submodule](https://gitlab.com/mirador1/mirador-common/-/blob/main/docs/adr/0001-shared-repo-via-submodule.md)
-- [java ADR-0008 — feature-slicing](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/adr/0008-feature-slicing.md) (where `com.mirador.order.*` lives)
+- [Java foundation MR](https://gitlab.com/iris-7/iris-service-java/-/merge_requests?scope=all&state=merged&search=feature%2Forder)
+- [Python foundation MR](https://gitlab.com/iris-7/iris-service-python/-/merge_requests?scope=all&state=merged&search=feature%2Forder)
+- [UI Orders foundation MR !155](https://gitlab.com/iris-7/iris-ui/-/merge_requests/155)
+- [Common ADR-0001 — polyrepo via submodule](https://gitlab.com/iris-7/iris-common/-/blob/main/docs/adr/0001-shared-repo-via-submodule.md)
+- [java ADR-0008 — feature-slicing](https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/adr/0008-feature-slicing.md) (where `com.iris.order.*` lives)
 - Eric Evans, *Domain-Driven Design* (2003), ch. 5 § "Entities" — the criterion that motivated treating `OrderLine` as an entity.

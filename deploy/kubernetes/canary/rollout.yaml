@@ -1,5 +1,5 @@
 # =============================================================================
-# Argo Rollout — canary deployment strategy for the mirador backend.
+# Argo Rollout — canary deployment strategy for the iris backend.
 #
 # Replaces the plain Deployment (`backend/deployment.yaml`) when Argo Rollouts
 # is installed (full mode only). The pod template is identical — only the
@@ -22,10 +22,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: mirador
+  name: iris
   namespace: app
   labels:
-    app.kubernetes.io/name: mirador
+    app.kubernetes.io/name: iris
     app.kubernetes.io/component: backend
 spec:
   replicas: 2
@@ -33,7 +33,7 @@ spec:
   # keeps routing to the pods Argo Rollouts creates.
   selector:
     matchLabels:
-      app.kubernetes.io/name: mirador
+      app.kubernetes.io/name: iris
       app.kubernetes.io/component: backend
 
   # ── Strategy: canary with analysis gating ─────────────────────────────
@@ -58,10 +58,10 @@ spec:
             duration: 60s
         - analysis:
             templates:
-              - templateName: mirador-error-rate
+              - templateName: iris-error-rate
             args:
               - name: service-name
-                value: mirador.app.svc.cluster.local
+                value: iris.app.svc.cluster.local
 
         # Step 2 — half the fleet
         - setWeight: 50
@@ -69,10 +69,10 @@ spec:
             duration: 2m
         - analysis:
             templates:
-              - templateName: mirador-error-rate
+              - templateName: iris-error-rate
             args:
               - name: service-name
-                value: mirador.app.svc.cluster.local
+                value: iris.app.svc.cluster.local
 
         # Step 3 — full promotion happens automatically when the above
         # analysis succeeds. No explicit `setWeight: 100` needed.
@@ -92,7 +92,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: mirador
+        app.kubernetes.io/name: iris
         app.kubernetes.io/component: backend
       annotations:
         prometheus.io/scrape: "true"
@@ -113,13 +113,13 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              app.kubernetes.io/name: mirador
+              app.kubernetes.io/name: iris
               app.kubernetes.io/component: backend
       containers:
-        - name: mirador
+        - name: iris
           # Pinned to :main (CI pushes this tag on every main merge since
           # commit 7049b3e). Matches the Deployment image in overlays/gke/.
-          image: "registry.gitlab.com/mirador1/mirador-service/backend:main"
+          image: "registry.gitlab.com/iris-7/iris-service/backend:main"
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -153,27 +153,27 @@ spec:
               readOnly: true
           envFrom:
             - configMapRef:
-                name: mirador-config
+                name: iris-config
           env:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mirador-secrets
+                  name: iris-secrets
                   key: DB_PASSWORD
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: mirador-secrets
+                  name: iris-secrets
                   key: JWT_SECRET
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: mirador-secrets
+                  name: iris-secrets
                   key: API_KEY
             - name: OTEL_EXPORTER_OTLP_AUTH
               valueFrom:
                 secretKeyRef:
-                  name: mirador-secrets
+                  name: iris-secrets
                   key: OTEL_EXPORTER_OTLP_AUTH
             - name: MANAGEMENT_TRACING_EXPORT_OTLP_HEADERS_AUTHORIZATION
               value: "Basic $(OTEL_EXPORTER_OTLP_AUTH)"
@@ -182,7 +182,7 @@ spec:
             - name: GITLAB_API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: mirador-secrets
+                  name: iris-secrets
                   key: GITLAB_API_TOKEN
           resources:
             requests:
@@ -229,7 +229,7 @@ spec:
         # prediction endpoints.
         - name: churn-model
           configMap:
-            name: mirador-churn-model
+            name: iris-churn-model
             optional: true
             items:
               - key: churn_predictor.onnx

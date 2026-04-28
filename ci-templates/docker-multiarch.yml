@@ -2,7 +2,7 @@
 #
 # Usage :
 #   include:
-#     - project: 'mirador1/mirador-service-shared'
+#     - project: 'iris-7/iris-service-shared'
 #       ref: main
 #       file: 'ci-templates/docker-multiarch.yml'
 #

@@ -57,7 +57,7 @@ exporters:
   # Dual-export to the GitLab group's Observability endpoint so traces/metrics/
   # logs are visible directly in GitLab's UI (no Grafana/Tempo needed locally).
   #
-  # Enabled 2026-04-23 on mirador1 group (group-id 130289716). Beta /
+  # Enabled 2026-04-23 on iris-7 group (group-id 130289716). Beta /
   # experimental / free during beta period per GitLab's own UI. Endpoint
   # uses TLS HTTPS on port 14318 (OTLP over HTTP).
   #

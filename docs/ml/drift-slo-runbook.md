@@ -3,11 +3,11 @@
 > **Phase E runbook** for shared ADR-0061. Pairs with
 > [`bin/ml/compute_drift.py`](../../bin/ml/compute_drift.py),
 > the Prometheus rules in
-> [`deploy/kubernetes/observability-prom/mirador-drift-alerts.yaml`](../../deploy/kubernetes/observability-prom/mirador-drift-alerts.yaml),
+> [`deploy/kubernetes/observability-prom/iris-drift-alerts.yaml`](../../deploy/kubernetes/observability-prom/iris-drift-alerts.yaml),
 > the CronJob in
 > [`deploy/kubernetes/canary/ml-drift-cronjob.yaml`](../../deploy/kubernetes/canary/ml-drift-cronjob.yaml),
 > and the Grafana dashboard at
-> [`infra/observability/grafana/dashboards-lgtm/mirador-churn-drift.json`](../../infra/observability/grafana/dashboards-lgtm/mirador-churn-drift.json).
+> [`infra/observability/grafana/dashboards-lgtm/iris-churn-drift.json`](../../infra/observability/grafana/dashboards-lgtm/iris-churn-drift.json).
 
 A churn-prediction model that drifts away from its training
 distribution silently degrades : the JVM still serves predictions,
@@ -20,10 +20,10 @@ BEFORE the business notices.
 | Layer | Owner |
 |---|---|
 | Daily KS-test per feature | `bin/ml/compute_drift.py` (CronJob) |
-| Push to Prometheus | Pushgateway → `mirador_churn_drift_ks_stat{feature, model}` |
+| Push to Prometheus | Pushgateway → `iris_churn_drift_ks_stat{feature, model}` |
 | SLO target | 99 % of samples with `max(KS-stat) < 0.20` over 30 days |
 | Alert routing | 4-tier multi-window/burn-rate (page / page / ticket / ticket) per ADR-0058 |
-| Visualisation | Grafana dashboard `mirador-churn-drift` |
+| Visualisation | Grafana dashboard `iris-churn-drift` |
 
 The 0.20 threshold comes from Tabachnick + Fidell, *Using
 Multivariate Statistics* — KS-stat ≥ 0.20 between two same-N
@@ -43,12 +43,12 @@ samples is the literature's "actionable drift" cut-off.
 
 ### Step 1 — Identify which feature drifted
 
-Open the [Grafana dashboard](http://localhost:3001/d/mirador-churn-drift/customer-churn-model-drift-phase-e)
+Open the [Grafana dashboard](http://localhost:3001/d/iris-churn-drift/customer-churn-model-drift-phase-e)
 ("Per-feature drift over time" panel). The top trace is the worst
 offender. Common patterns :
 
 - **Single feature spiked** → a data-pipeline change. Run
-  `git log --since=7d -- src/mirador_service/ml/feature_engineering.py`
+  `git log --since=7d -- src/iris_service/ml/feature_engineering.py`
   to spot a recent change ; if found, that's likely the cause.
 - **Multiple features rising together** → real population shift
   (seasonality, marketing campaign, geographical expansion).
@@ -97,8 +97,8 @@ within 24 h (next CronJob run).
 #### Re-train + promote a fresh model
 
 ```bash
-cd ../mirador-service-python
-uv run python -m mirador_service.ml.train_churn \
+cd ../iris-service-python
+uv run python -m iris_service.ml.train_churn \
   --data-source postgres \
   --output ./model.onnx
 # The training script logs to MLflow + tags as 'Staging' if AUC ≥ 0.60.
@@ -130,7 +130,7 @@ Escalate via the on-call rotation lead + open a postmortem.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `ChurnDriftStaleData` fires repeatedly | CronJob never runs | `kubectl describe cronjob mirador-churn-drift -n mirador` ; check `Last Schedule Time` ; if Never, the schedule is wrong or the namespace is paused. |
+| `ChurnDriftStaleData` fires repeatedly | CronJob never runs | `kubectl describe cronjob iris-churn-drift -n iris` ; check `Last Schedule Time` ; if Never, the schedule is wrong or the namespace is paused. |
 | CronJob pods crash with `RuntimeError: no Production-tagged version` | Nothing in MLflow registry | Run a training run + promote via the MLflow UI. The drift script needs a baseline. |
 | CronJob pods crash with `connection refused` to MLflow | MLflow service is down | `kubectl get svc mlflow -n mlflow` ; if no endpoints, the MLflow pod hasn't started. |
 | Drift gauge stays at 0 even when reality drifts | `training_features.csv` artefact missing on the Production run | Re-train + log the artefact (the training script does this automatically since Phase A). |
@@ -178,5 +178,5 @@ Latency p99 + Enrichment success. Specific items to bring :
 - [shared ADR-0061 — Customer Churn](../adr/0061-customer-churn-prediction.md)
 - [shared ADR-0062 — MLflow registry + ConfigMap promotion](../adr/0062-mlflow-registry-configmap-promotion.md)
 - [`docs/ml/promote-churn-model.md`](promote-churn-model.md) — the model promotion runbook (Phase F).
-- [Java feature doc](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/ml/churn-prediction.md).
-- [Python feature doc](https://gitlab.com/mirador1/mirador-service-python/-/blob/main/docs/ml/churn-prediction.md).
+- [Java feature doc](https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/ml/churn-prediction.md).
+- [Python feature doc](https://gitlab.com/iris-7/iris-service-python/-/blob/main/docs/ml/churn-prediction.md).

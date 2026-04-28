@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
-    "Mirador service — automated dependency updates.",
+    "Iris service — automated dependency updates.",
     "Strategy: keep the repo on current stable versions without human chasing.",
     "Minor/patch updates auto-merge when CI is green. Majors always require",
     "human review (see ADR-0006 — centralised versions in pom.xml properties).",

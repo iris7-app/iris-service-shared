@@ -1,7 +1,7 @@
-# Contributing to mirador-service-shared
+# Contributing to iris-service-shared
 
-`mirador-service-shared` is the **infrastructure / observability / CI
-templates / cross-cutting docs** repo for the [mirador1](https://gitlab.com/mirador1)
+`iris-service-shared` is the **infrastructure / observability / CI
+templates / cross-cutting docs** repo for the [iris-7](https://gitlab.com/iris-7)
 project family. It's submoduled into the consuming service repos under
 `infra/shared/`.
 
@@ -10,7 +10,7 @@ broken CI template breaks all 4 sibling repos. Review accordingly.
 
 ## Where to contribute
 
-GitLab is canonical : [gitlab.com/mirador1/mirador-service-shared](https://gitlab.com/mirador1/mirador-service-shared).
+GitLab is canonical : [gitlab.com/iris-7/iris-service-shared](https://gitlab.com/iris-7/iris-service-shared).
 
 ## What lives here
 
@@ -28,7 +28,7 @@ GitLab is canonical : [gitlab.com/mirador1/mirador-service-shared](https://gitla
 ## Update workflow
 
 ```bash
-# In mirador-service-shared :
+# In iris-service-shared :
 git switch main
 # … edit, commit, push …
 git push origin main
@@ -36,7 +36,7 @@ git push origin main
 git tag stable-v0.X.Y && git push origin stable-v0.X.Y
 
 # In each consumer repo (svc-java + python) :
-cd ../mirador-service-java/infra/shared  # or ../mirador-service-python/infra/shared
+cd ../iris-service-java/infra/shared  # or ../iris-service-python/infra/shared
 git pull origin main
 cd ../..
 git add infra/shared
@@ -62,21 +62,21 @@ overwrites the common config).
 ## SLO rules generation
 
 When editing SLO definitions (in the consuming service repos, e.g.
-`mirador-service-java/docs/slo/slo.yaml`), regenerate the PrometheusRule :
+`iris-service-java/docs/slo/slo.yaml`), regenerate the PrometheusRule :
 
 ```bash
-cd ../mirador-service-java
-sloth generate -i docs/slo/slo.yaml -o /tmp/mirador-slo-rules.yaml
+cd ../iris-service-java
+sloth generate -i docs/slo/slo.yaml -o /tmp/iris-slo-rules.yaml
 python3 docs/slo/wrap-as-prometheusrule.py
-# Output : ../mirador-service-shared/deploy/kubernetes/observability-prom/mirador-slo.yaml
+# Output : ../iris-service-shared/deploy/kubernetes/observability-prom/iris-slo.yaml
 
-cd ../mirador-service-shared
-git add deploy/kubernetes/observability-prom/mirador-slo.yaml
+cd ../iris-service-shared
+git add deploy/kubernetes/observability-prom/iris-slo.yaml
 git commit -m "chore(slo): regenerate Java rules from updated slo.yaml"
 git push
 ```
 
-Same for Python (`mirador-py-slo.yaml`).
+Same for Python (`iris-py-slo.yaml`).
 
 ## Tests / validation
 
@@ -88,7 +88,7 @@ Validation happens at consumer-repo CI level :
 
 ## See also
 
-- [Java sibling CONTRIBUTING.md](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/CONTRIBUTING.md)
-- [Python sibling CONTRIBUTING.md](https://gitlab.com/mirador1/mirador-service-python/-/blob/main/CONTRIBUTING.md)
+- [Java sibling CONTRIBUTING.md](https://gitlab.com/iris-7/iris-service-java/-/blob/main/CONTRIBUTING.md)
+- [Python sibling CONTRIBUTING.md](https://gitlab.com/iris-7/iris-service-python/-/blob/main/CONTRIBUTING.md)
 - [ADR-0001 — Shared repo via submodule](docs/adr/0001-shared-repo-via-submodule.md)
 - [SLO review cadence](docs/slo/review-cadence.md)

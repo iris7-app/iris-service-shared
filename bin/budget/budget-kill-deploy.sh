@@ -3,7 +3,7 @@
 # bin/budget/budget-kill-deploy.sh — wire the budget alert to auto-destroy.
 #
 # One-time setup (idempotent). Creates:
-#   1. Pub/Sub topic `mirador-budget-kill`
+#   1. Pub/Sub topic `iris-budget-kill`
 #   2. Cloud Function `budget-kill` (deploy/cloud-functions/budget-kill/)
 #      subscribed to the topic
 #   3. IAM binding: the function's runtime SA gains `container.admin` on
@@ -13,7 +13,7 @@
 #      the end-to-end flow
 #
 # After this, the 100%-of-budget threshold triggers the Cloud Function
-# which does `gcloud container clusters delete mirador-prod --region=
+# which does `gcloud container clusters delete @@KEEP_IRIS_PROD@@ --region=
 # europe-west1 --quiet`. Re-run this script any time you change the
 # function code or the budget cap — all steps are idempotent.
 #
@@ -26,7 +26,7 @@ set -eu
 
 PROJECT="${GCP_PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
 REGION="${FUNCTION_REGION:-europe-west1}"
-TOPIC="${TOPIC:-mirador-budget-kill}"
+TOPIC="${TOPIC:-iris-budget-kill}"
 FUNCTION_NAME="${FUNCTION_NAME:-budget-kill}"
 BILLING_ACCOUNT="${BILLING_ACCOUNT:-019384-EA1A6A-9D635C}"
 BUDGET_ID="${BUDGET_ID:-cb08b055-d30e-4830-a18a-94bed797f116}"
@@ -75,7 +75,7 @@ run gcloud functions deploy "$FUNCTION_NAME" \
   --entry-point=budget_kill \
   --source="$SRC_DIR" \
   --trigger-topic="$TOPIC" \
-  --set-env-vars="GCP_PROJECT=$PROJECT,GKE_REGION=$REGION,GKE_CLUSTER=mirador-prod" \
+  --set-env-vars="GCP_PROJECT=$PROJECT,GKE_REGION=$REGION,GKE_CLUSTER=@@KEEP_IRIS_PROD@@" \
   --memory=256MB \
   --timeout=60s \
   --gen2 \
@@ -116,7 +116,7 @@ if [[ "$DRY" != "1" ]]; then
 fi
 new_id=$(run gcloud billing budgets create \
   --billing-account="$BILLING_ACCOUNT" \
-  --display-name="Mirador €10 alert (auto-kill)" \
+  --display-name="Iris €10 alert (auto-kill)" \
   --budget-amount="$BUDGET_AMOUNT" \
   --threshold-rule=percent=0.5 \
   --threshold-rule=percent=0.8 \

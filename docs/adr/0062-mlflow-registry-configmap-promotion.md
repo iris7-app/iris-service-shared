@@ -6,7 +6,7 @@ Status: Accepted
 ## Context
 
 Per [ADR-0060](0060-onnx-cross-language-ml-inference.md), the
-Mirador backends consume a single `.onnx` artefact for in-process
+Iris backends consume a single `.onnx` artefact for in-process
 inference. Two operational questions follow :
 
 1. **Where is the artefact stored, with full lineage** (which
@@ -39,7 +39,7 @@ the answer.
        │  mlflow.register_model("ChurnPredictor")
        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  MLflow tracking server (mirador-service-shared)        │
+│  MLflow tracking server (iris-service-shared)        │
 │  ─────────────────────────────────────────────────       │
 │  - Backend store     : Postgres (re-uses dev-stack)     │
 │  - Artifact store    : MinIO (S3-compatible, dev) /     │
@@ -58,17 +58,17 @@ the answer.
        │  Steps :
        │    1. mlflow API  : get latest Production ChurnPredictor
        │    2. Download    : artefact `churn_predictor.onnx`
-       │    3. kubectl     : `create configmap mirador-churn-model
+       │    3. kubectl     : `create configmap iris-churn-model
        │                       --from-file=churn_predictor.onnx
        │                       --dry-run=client -o yaml |
        │                       kubectl apply -f -`
        │    4. Annotations : promoted-by, mlflow-run-id,
        │                       promoted-at, model-version
        │    5. kubectl     : `rollout restart deployment/
-       │                       mirador-service-{java,python}`
+       │                       iris-service-{java,python}`
        ▼
 ┌─────────────────────────────────────────────────────────┐
-│  K8s deployments (mirador-service-java + -python)       │
+│  K8s deployments (iris-service-java + -python)       │
 │  ─────────────────────────────────────────────────       │
 │  spec.template.spec.containers[0].volumeMounts :        │
 │    - name: model                                         │
@@ -77,7 +77,7 @@ the answer.
 │  spec.template.spec.volumes :                            │
 │    - name: model                                         │
 │      configMap:                                          │
-│        name: mirador-churn-model                         │
+│        name: iris-churn-model                         │
 │        items:                                            │
 │          - key: churn_predictor.onnx                     │
 │            path: churn_predictor.onnx                    │
@@ -161,11 +161,11 @@ is the load-bearing virtue.
   "Postgres extract" → "training run" → "evaluation metrics" →
   "ONNX artefact" → "ConfigMap version" → "running pod" is
   traceable.
-- **Rollback in seconds** : `kubectl edit configmap mirador-
+- **Rollback in seconds** : `kubectl edit configmap iris-
   churn-model` to restore previous content + `rollout restart`.
   No re-training, no re-build.
 - **GitOps-friendly** : ConfigMap YAML can live in `infra/
-  shared/deploy/kubernetes/base/models/mirador-churn-model.yaml`
+  shared/deploy/kubernetes/base/models/iris-churn-model.yaml`
   with the actual `data:` block as a base64-encoded block.
   Argo CD diff shows the change explicitly before apply.
 - **Observability** : MLflow tracking server is itself an
@@ -177,7 +177,7 @@ is the load-bearing virtue.
 ### Negative
 - **MLflow tracking server is new infrastructure** : adds 1
   container (Postgres-backed tracking + MinIO/GCS artefact
-  store + Flask UI). Mitigation : declared in `mirador-
+  store + Flask UI). Mitigation : declared in `iris-
   service-shared/compose/mlflow.yml` so dev + CI use the same
   stack ; in production the tracking server uses managed
   Postgres + GCS bucket.
@@ -190,7 +190,7 @@ is the load-bearing virtue.
   fails the promotion if the check fails.
 - **K8s coupling** : ConfigMap is a K8s primitive ; local
   Docker Compose dev doesn't have it. Mitigation : in dev,
-  the same artefact is bind-mounted from `~/dev/mirador/.models/`
+  the same artefact is bind-mounted from `~/dev/iris/.models/`
   (gitignored) ; the promotion script's `--target=local`
   variant handles this case.
 
@@ -208,7 +208,7 @@ is the load-bearing virtue.
 docker compose -f infra/shared/compose/mlflow.yml up -d
 
 # Train + log to MLflow
-cd ~/dev/mirador/mirador-service-python
+cd ~/dev/iris/iris-service-python
 bin/ml/train_churn.py --mlflow-uri http://localhost:5000
 
 # Promote latest run to local /etc/models cache
@@ -220,16 +220,16 @@ bin/ml/promote_to_configmap.sh --target=local
 # Promotion is normally driven by a CronJob (weekly retraining
 # + automatic Production tag on AUC > baseline). Manual override :
 bin/ml/promote_to_configmap.sh \
-    --mlflow-uri https://mlflow.mirador.example/ \
+    --mlflow-uri https://mlflow.iris.example/ \
     --target=k8s \
-    --kubeconfig ~/.kube/config-mirador-prod \
-    --namespace mirador
+    --kubeconfig ~/.kube/config-@@KEEP_IRIS_PROD@@ \
+    --namespace iris
 ```
 
 The ConfigMap annotations after a successful promotion :
 ```yaml
 metadata:
-  name: mirador-churn-model
+  name: iris-churn-model
   annotations:
     mlflow-run-id: "abc123def456"
     mlflow-model-version: "v3"

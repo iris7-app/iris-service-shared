@@ -3,7 +3,7 @@
 # is up + the group runner is online from GitLab's perspective.
 #
 # Why : the macbook-local runner is a Docker container. If it crashes
-# (cache adapter error, OOM, Docker Desktop restart), all 4 mirador1
+# (cache adapter error, OOM, Docker Desktop restart), all 4 iris-7
 # pipelines silently stall in `pending` until manually restarted.
 # This script catches that within the launchd 5-min cadence.
 #
@@ -12,7 +12,7 @@
 #   bin/dev/runner-healthcheck.sh --fix   (auto-restart container if dead)
 #   bin/dev/runner-healthcheck.sh --quiet (only print on failure ; cron mode)
 #
-# Wired via bin/launchd/com.mirador.runner-healthcheck.plist (every 5 min).
+# Wired via bin/launchd/com.iris.runner-healthcheck.plist (every 5 min).
 
 set -euo pipefail
 
@@ -39,7 +39,7 @@ if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^gitlab-runner$' ; t
     else
         warn "   → re-run with --fix to attempt 'docker start gitlab-runner'"
         # Best-effort desktop notification
-        osascript -e 'display notification "gitlab-runner container is dead. Run bin/dev/runner-healthcheck.sh --fix" with title "Mirador CI"' 2>/dev/null || true
+        osascript -e 'display notification "gitlab-runner container is dead. Run bin/dev/runner-healthcheck.sh --fix" with title "Iris CI"' 2>/dev/null || true
         exit 1
     fi
 fi
@@ -50,7 +50,7 @@ recent_errors=$(docker logs --since 5m gitlab-runner 2>&1 | grep -ciE 'fatal|pan
 if [ "$recent_errors" -gt 5 ]; then
     warn "❌ gitlab-runner has $recent_errors recent error log lines (cache adapter / panic). Investigate."
     docker logs --since 5m gitlab-runner 2>&1 | grep -iE 'fatal|panic|cache factory' | tail -5 >&2
-    osascript -e 'display notification "gitlab-runner spamming errors. Check docker logs." with title "Mirador CI"' 2>/dev/null || true
+    osascript -e 'display notification "gitlab-runner spamming errors. Check docker logs." with title "Iris CI"' 2>/dev/null || true
     exit 1
 fi
 log "✓ gitlab-runner has no recent fatal errors."
@@ -68,7 +68,7 @@ if [ -f "$TOKEN_FILE" ]; then
             warn "   → restarting container to re-establish GitLab connection"
             docker restart gitlab-runner 2>&1 | tail -2
         fi
-        osascript -e "display notification \"Group runner status=$status. Check network or restart container.\" with title \"Mirador CI\"" 2>/dev/null || true
+        osascript -e "display notification \"Group runner status=$status. Check network or restart container.\" with title \"Iris CI\"" 2>/dev/null || true
         exit 1
     fi
     log "✓ GitLab API reports group runner 52880082 status=online."

@@ -16,7 +16,7 @@
 #     "expected a map, got 'slice'".
 # =============================================================================
 
-title = "Mirador Service — gitleaks config"
+title = "Iris Service — gitleaks config"
 
 # Extend the built-in ruleset (AWS, GCP, Azure, GitHub, GitLab, npm, PyPI,
 # generic-api-key, high-entropy, etc.). See:

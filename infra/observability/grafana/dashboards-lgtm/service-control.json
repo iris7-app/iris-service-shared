@@ -3,7 +3,7 @@
   "description": "Interactive dashboard — Docker container start/stop, traffic generation. Calls the Docker Engine API (localhost:2375 CORS proxy) and Spring Boot API (localhost:8080) directly from the browser.",
   "uid": "service-control",
   "tags": [
-    "mirador",
+    "iris",
     "interactive",
     "docker"
   ],

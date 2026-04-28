@@ -1,4 +1,4 @@
-# Mirador-service-python — local dev stack.
+# Iris-service-python — local dev stack.
 #
 # Mirror of the Java side's docker-compose.yml minus the JVM-specific tools
 # (Sonar, Maven site). Brings up :
@@ -16,24 +16,24 @@
 services:
   postgres:
     image: postgres:16.6-alpine
-    container_name: mirador-py-postgres
+    container_name: iris-py-postgres
     environment:
-      POSTGRES_DB: mirador
-      POSTGRES_USER: mirador
-      POSTGRES_PASSWORD: mirador
+      POSTGRES_DB: iris
+      POSTGRES_USER: iris
+      POSTGRES_PASSWORD: iris
     ports:
       - "5432:5432"
     volumes:
-      - mirador-py-pgdata:/var/lib/postgresql/data
+      - iris-py-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mirador -d mirador"]
+      test: ["CMD-SHELL", "pg_isready -U iris -d iris"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7.4.1-alpine
-    container_name: mirador-py-redis
+    container_name: iris-py-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -46,7 +46,7 @@ services:
     # KRaft mode (no zookeeper) — bitnami's image bakes in the controller +
     # broker on the same node, simplest local setup.
     image: bitnami/kafka:3.9.0
-    container_name: mirador-py-kafka
+    container_name: iris-py-kafka
     ports:
       - "9092:9092"
     environment:
@@ -75,11 +75,11 @@ services:
     # Mimir + a pre-wired OTel Collector receiving on :4318 (HTTP) and :4317 (gRPC).
     # Same image as the Java side for parity — dashboards work for both services.
     image: grafana/otel-lgtm:0.8.6
-    container_name: mirador-py-lgtm
+    container_name: iris-py-lgtm
     ports:
       - "3000:3000"   # Grafana UI
       - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP — what mirador_service.observability.otel uses
+      - "4318:4318"   # OTLP HTTP — what iris_service.observability.otel uses
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -104,11 +104,11 @@ services:
     # Bring it up with : docker compose --profile ml up -d mlflow
     profiles: ["ml"]
     image: ghcr.io/mlflow/mlflow:v2.20.4
-    container_name: mirador-mlflow
+    container_name: iris-mlflow
     ports:
       - "5000:5000"
     volumes:
-      - mirador-mlflow-data:/mlflow
+      - iris-mlflow-data:/mlflow
     environment:
       MLFLOW_BACKEND_STORE_URI: sqlite:////mlflow/mlflow.db
       MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
@@ -132,11 +132,11 @@ services:
     # `docker compose up -d` (default) doesn't pull it.
     profiles: ["llm"]
     image: ollama/ollama:0.9.0
-    container_name: mirador-ollama
+    container_name: iris-ollama
     ports:
       - "11434:11434"
     volumes:
-      - mirador-ollama-data:/root/.ollama
+      - iris-ollama-data:/root/.ollama
     # Serve in background, pull model on first boot, then keep serving.
     entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.2 && wait"]
     healthcheck:
@@ -146,9 +146,9 @@ services:
       retries: 30
 
 volumes:
-  mirador-py-pgdata:
-    name: mirador-py-pgdata
-  mirador-ollama-data:
-    name: mirador-ollama-data
-  mirador-mlflow-data:
-    name: mirador-mlflow-data
+  iris-py-pgdata:
+    name: iris-py-pgdata
+  iris-ollama-data:
+    name: iris-ollama-data
+  iris-mlflow-data:
+    name: iris-mlflow-data

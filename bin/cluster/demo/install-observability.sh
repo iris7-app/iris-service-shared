@@ -16,8 +16,8 @@
 #
 # What this enables:
 #   - OpenLens / k9s / Headlamp "metrics" tabs populate via Prometheus scrape.
-#   - Mirador /actuator/prometheus scraped by ServiceMonitor (see
-#     deploy/kubernetes/overlays/gke-prom/mirador-servicemonitor.yaml).
+#   - Iris /actuator/prometheus scraped by ServiceMonitor (see
+#     deploy/kubernetes/overlays/gke-prom/iris-servicemonitor.yaml).
 #   - kube-state-metrics populated (pod status, deployment replicas, …).
 #   - kubelet cAdvisor metrics (CPU/memory per pod).
 #
@@ -65,8 +65,8 @@ helm upgrade --install kube-prometheus-stack \
   --set alertmanager.enabled=false \
   --wait --timeout 10m
 
-echo "▶️  Applying Mirador ServiceMonitor so /actuator/prometheus is scraped…"
-kubectl apply -f "$REPO_ROOT/deploy/kubernetes/overlays/gke-prom/mirador-servicemonitor.yaml"
+echo "▶️  Applying Iris ServiceMonitor so /actuator/prometheus is scraped…"
+kubectl apply -f "$REPO_ROOT/deploy/kubernetes/overlays/gke-prom/iris-servicemonitor.yaml"
 
 echo ""
 echo "✅ Observability installed."

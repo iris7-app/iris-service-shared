@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- mirador-service-shared (cross-cutting infra) — GREY/SLATE variant
+  <!-- iris-service-shared (cross-cutting infra) — GREY/SLATE variant
        for visual neutrality.  Watchtower silhouette mirrors the
-       mirador-service-java + mirador-ui + mirador-service-python logos
+       iris-service-java + iris-ui + iris-service-python logos
        for visual sibling identity ; the grey colour signals "infra /
        cross-cutting / not application code". -->
   <rect width="32" height="32" rx="7" fill="#000000"/>

@@ -27,7 +27,7 @@
       "title": "SLO source — slo.yaml",
       "tooltip": "Open the SLO YAML definition",
       "type": "link",
-      "url": "https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/slo/slo.yaml"
+      "url": "https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/slo/slo.yaml"
     },
     {
       "asDropdown": false,
@@ -39,7 +39,7 @@
       "title": "SLA documentation",
       "tooltip": "Open the SLA promise document",
       "type": "link",
-      "url": "https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/slo/sla.md"
+      "url": "https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/slo/sla.md"
     }
   ],
   "panels": [
@@ -77,7 +77,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"mirador-service-availability\"}) * 100",
+          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"iris-service-availability\"}) * 100",
           "legendFormat": "Availability",
           "refId": "A"
         }
@@ -114,7 +114,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"mirador-service-latency-p99\"}) * 100",
+          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"iris-service-latency-p99\"}) * 100",
           "legendFormat": "Latency p99",
           "refId": "A"
         }
@@ -151,7 +151,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"mirador-service-enrichment-success\"}) * 100",
+          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=\"iris-service-enrichment-success\"}) * 100",
           "legendFormat": "Enrichment success",
           "refId": "A"
         }
@@ -196,7 +196,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=~\"mirador-service.*\"}) * 100",
+          "expr": "(1 - slo:current_burn_rate:ratio{sloth_id=~\"iris-service.*\"}) * 100",
           "legendFormat": "{{ sloth_slo }} ({{ sloth_service }})",
           "refId": "A"
         }
@@ -238,7 +238,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "slo:current_burn_rate:ratio{sloth_id=~\"mirador-service.*\"}",
+          "expr": "slo:current_burn_rate:ratio{sloth_id=~\"iris-service.*\"}",
           "legendFormat": "{{ sloth_slo }} ({{ sloth_service }})",
           "refId": "A"
         }
@@ -250,13 +250,13 @@
   "preload": false,
   "refresh": "30s",
   "schemaVersion": 39,
-  "tags": ["slo", "mirador", "sre"],
+  "tags": ["slo", "iris", "sre"],
   "templating": {"list": []},
   "time": {"from": "now-30d", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
-  "title": "SLO Overview — Mirador",
-  "uid": "mirador-slo-overview",
+  "title": "SLO Overview — Iris",
+  "uid": "iris-slo-overview",
   "version": 1,
   "weekStart": ""
 }

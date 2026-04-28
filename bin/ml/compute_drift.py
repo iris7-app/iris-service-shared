@@ -9,7 +9,7 @@ The script :
 
 1. Pulls the **training-time feature distribution** from MLflow's
    Production-tagged run (logged as a CSV artefact ``training_features.csv``
-   by ``mirador_service.ml.train_churn``).
+   by ``iris_service.ml.train_churn``).
 2. Pulls the **current population's feature distribution** from the
    live Postgres (running ``feature_engineering.build_features`` on
    the last 30 days of customers).
@@ -18,7 +18,7 @@ The script :
 4. Logs each per-feature stat as :
    - A **Prometheus gauge** (pushed via the Pushgateway sidecar that
      the SLO definition reads — see
-     ``deploy/kubernetes/observability-prom/mirador-drift-alerts.yaml``).
+     ``deploy/kubernetes/observability-prom/iris-drift-alerts.yaml``).
    - A **MLflow metric** on the model registry's current Production
      run (so the MLflow UI's compare-runs view shows drift over time).
 5. Exits non-zero if ANY feature's KS-stat exceeds the SLO threshold
@@ -94,7 +94,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--db-url",
-        default=os.environ.get("MIRADOR_DB_URL"),
+        default=os.environ.get("IRIS_DB_URL"),
         help="Postgres URL (e.g. postgresql+asyncpg://user:pass@host/db). "
         "Required unless --skip-current is set.",
     )
@@ -145,7 +145,7 @@ def fetch_training_features(mlflow_uri: str, model_name: str) -> "pd.DataFrame":
     """Pull training_features.csv from the Production-tagged model run.
 
     The training script logs this artefact alongside the .onnx export
-    (see ``mirador_service.ml.train_churn`` Phase A). Without it, the
+    (see ``iris_service.ml.train_churn`` Phase A). Without it, the
     drift computation is blind ; we raise rather than silently skip.
     """
     import mlflow
@@ -186,7 +186,7 @@ def fetch_current_features(db_url: str, lookback_days: int) -> "pd.DataFrame":  
     from sqlalchemy import text
     from sqlalchemy.ext.asyncio import create_async_engine
 
-    from mirador_service.ml.feature_engineering import build_features
+    from iris_service.ml.feature_engineering import build_features
 
     cutoff = datetime.now(UTC) - timedelta(days=lookback_days)
 
@@ -271,14 +271,14 @@ def push_to_prometheus(results: list[DriftResult], pushgateway_url: str, model_n
 
     registry = CollectorRegistry()
     drift_gauge = Gauge(
-        "mirador_churn_drift_ks_stat",
+        "iris_churn_drift_ks_stat",
         "Kolmogorov-Smirnov 2-sample statistic between training and current "
         "feature distribution. Lower = closer to training. SLO threshold 0.20.",
         labelnames=["feature", "model"],
         registry=registry,
     )
     samples_gauge = Gauge(
-        "mirador_churn_drift_sample_count",
+        "iris_churn_drift_sample_count",
         "Number of samples in the current-population window for the KS computation.",
         labelnames=["feature", "model"],
         registry=registry,
@@ -289,7 +289,7 @@ def push_to_prometheus(results: list[DriftResult], pushgateway_url: str, model_n
 
     push_to_gateway(
         pushgateway_url,
-        job="mirador-churn-drift",
+        job="iris-churn-drift",
         registry=registry,
     )
     logger.info(
@@ -324,7 +324,7 @@ def main(argv: list[str] | None = None) -> int:
     configure_logging()
 
     if args.db_url is None and not args.dry_run:
-        logger.error("MIRADOR_DB_URL required ; pass --db-url or set the env var.")
+        logger.error("IRIS_DB_URL required ; pass --db-url or set the env var.")
         return 2
 
     logger.info(

@@ -1,4 +1,4 @@
-# Backend cross-cutting ADRs — `mirador-service-shared`
+# Backend cross-cutting ADRs — `iris-service-shared`
 
 This directory captures the **why** of architectural choices that bind
 the **backend** repos (java + python) — observability stack, K8s posture,
@@ -7,15 +7,15 @@ multi-cloud terraform, secret management, SLO/SLA tooling. Format follows
 
 **Universal cross-repo ADRs** (decisions that bind ALL 4 repos including UI :
 submodule pattern, polyrepo vs monorepo, release engineering, Renovate base)
-moved to [`mirador-common/docs/adr/`](https://gitlab.com/mirador1/mirador-common/-/tree/main/docs/adr) on 2026-04-26.
+moved to [`iris-common/docs/adr/`](https://gitlab.com/iris-7/iris-common/-/tree/main/docs/adr) on 2026-04-26.
 That is : ADRs 0001, 0055, 0057, 0059 are now there, not here.
 
 For **repo-local decisions** (Spring Boot stack choice, FastAPI auth
 scheme, Angular zoneless mode), see each consumer repo's own
 `docs/adr/` :
-- [`mirador-service-java/docs/adr/`](https://gitlab.com/mirador1/mirador-service-java/-/tree/main/docs/adr)
-- [`mirador-service-python/docs/adr/`](https://gitlab.com/mirador1/mirador-service-python/-/tree/main/docs/adr)
-- [`mirador-ui/docs/adr/`](https://gitlab.com/mirador1/mirador-ui/-/tree/main/docs/adr)
+- [`iris-service-java/docs/adr/`](https://gitlab.com/iris-7/iris-service-java/-/tree/main/docs/adr)
+- [`iris-service-python/docs/adr/`](https://gitlab.com/iris-7/iris-service-python/-/tree/main/docs/adr)
+- [`iris-ui/docs/adr/`](https://gitlab.com/iris-7/iris-ui/-/tree/main/docs/adr)
 
 ## Status snapshot
 
@@ -36,7 +36,7 @@ scheme, Angular zoneless mode), see each consumer repo's own
 | **Cost discipline** | 0021 cost-deferred industrial patterns |
 | **Multi-cloud** | 0036 multi-cloud Terraform posture |
 
-**Moved to common** : 0001 (submodule pattern), 0055 (shell-based release), 0057 (polyrepo vs monorepo), 0059 (Renovate base preset). See [`mirador-common/docs/adr/`](https://gitlab.com/mirador1/mirador-common/-/tree/main/docs/adr).
+**Moved to common** : 0001 (submodule pattern), 0055 (shell-based release), 0057 (polyrepo vs monorepo), 0059 (Renovate base preset). See [`iris-common/docs/adr/`](https://gitlab.com/iris-7/iris-common/-/tree/main/docs/adr).
 
 ## Flat index
 
@@ -82,4 +82,4 @@ catches drift on their bundled copy).
 - [`../../bin/dev/regen-adr-index.sh`](../../bin/dev/regen-adr-index.sh) — regenerator
 - [`../../bin/ship/pre-sync.sh`](../../bin/ship/pre-sync.sh) — git safety pre-flight
 - [`../../README.md`](../../README.md) — shared repo overview + how to update
-- Consumer ADR dirs : [java](https://gitlab.com/mirador1/mirador-service-java/-/tree/main/docs/adr) · [python](https://gitlab.com/mirador1/mirador-service-python/-/tree/main/docs/adr) · [ui](https://gitlab.com/mirador1/mirador-ui/-/tree/main/docs/adr)
+- Consumer ADR dirs : [java](https://gitlab.com/iris-7/iris-service-java/-/tree/main/docs/adr) · [python](https://gitlab.com/iris-7/iris-service-python/-/tree/main/docs/adr) · [ui](https://gitlab.com/iris-7/iris-ui/-/tree/main/docs/adr)

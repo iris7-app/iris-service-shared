@@ -1,6 +1,6 @@
 # Live Demo Playbook — 10-minute walkthrough
 
-> Cross-cutting playbook for showing the Mirador project family in an
+> Cross-cutting playbook for showing the Iris project family in an
 > interview / hiring conversation. The goal is **observable industrial
 > backend** demonstrated in 10 minutes — not a 30-slide deck, not a
 > README walk-through.
@@ -9,19 +9,19 @@
 
 ```bash
 # 1. Bring the dev stack up (Postgres + Kafka + Redis + LGTM all in compose)
-cd /path/to/mirador-service-java     # or mirador-service-python
+cd /path/to/iris-service-java     # or iris-service-python
 ./bin/run.sh all                      # spawns the stack + the app
-# alternative for python : uv run mirador-service
+# alternative for python : uv run iris-service
 
 # 2. Verify the SLO Overview Grafana dashboard loads
-open http://localhost:3000/d/mirador-slo-overview/slo-overview-mirador
+open http://localhost:3000/d/iris-slo-overview/slo-overview-iris
 # admin / admin (default LGTM credentials)
 
 # 3. Open 4 browser tabs, side-by-side :
 #    - http://localhost:3000  (Grafana SLO dashboard)
 #    - http://localhost:8080/swagger-ui/index.html  (API)
 #    - http://localhost:4200  (Angular UI, if running)
-#    - https://gitlab.com/mirador1  (group landing)
+#    - https://gitlab.com/iris-7  (group landing)
 ```
 
 If anything fails to start : `docker compose -f infra/shared/compose/dev-stack.yml down -v` + retry.
@@ -30,19 +30,19 @@ If anything fails to start : `docker compose -f infra/shared/compose/dev-stack.y
 
 ### Minute 0-1 : The pitch
 
-> "Mirador is a portfolio polyrepo demo. Same business pattern — customer
+> "Iris is a portfolio polyrepo demo. Same business pattern — customer
 > onboarding with KYC-style enrichment + Kafka audit + diagnostics —
 > implemented twice (Java Spring Boot 4 + Python FastAPI) for parity.
 > The point isn't the customer domain ; it's the production-grade
 > engineering : SLO-as-code, observability-first, security supply chain,
 > CI quality gates that actually block."
 
-→ Open https://gitlab.com/mirador1 (group landing page, multicolor icon,
+→ Open https://gitlab.com/iris-7 (group landing page, multicolor icon,
 7 badges, polyrepo overview).
 
 ### Minute 1-3 : The architect matrix
 
-→ Click into [`mirador-service-java/README.md`](https://gitlab.com/mirador1/mirador-service-java/blob/main/README.md).
+→ Click into [`iris-service-java/README.md`](https://gitlab.com/iris-7/iris-service-java/blob/main/README.md).
 → Scroll to "What this proves for a senior backend architect" — 8-row
 table mapping each engineering concern to the concrete demonstration in the repo.
 
@@ -68,7 +68,7 @@ table mapping each engineering concern to the concrete demonstration in the repo
 
 ```bash
 # In a new terminal, fire controlled chaos to burn the latency SLO
-cd /path/to/mirador-service-shared    # OR via consumer's infra/shared/
+cd /path/to/iris-service-shared    # OR via consumer's infra/shared/
 ./bin/dev/burn-slo-budget.sh --target=java --slow-query=20 --interval=2
 ```
 
@@ -81,19 +81,19 @@ Watch Grafana :
 > notice the threshold lines at 1× / 6× / 14.4× from the SRE Workbook
 > alerting pattern."
 
-→ Switch to the [Latency Heatmap dashboard](http://localhost:3000/d/mirador-latency-heatmap/).
+→ Switch to the [Latency Heatmap dashboard](http://localhost:3000/d/iris-latency-heatmap/).
 
 > "Heatmap reveals tail-latency distribution invisible in p99 line charts.
 > Bimodal patterns, slow-mode regressions — all visible."
 
-→ Switch to [Apdex dashboard](http://localhost:3000/d/mirador-apdex/).
+→ Switch to [Apdex dashboard](http://localhost:3000/d/iris-apdex/).
 
 > "Apdex captures user satisfaction in one number — easier to communicate
 > to non-SRE stakeholders than 3 separate SLOs."
 
 ### Minute 7-9 : The polyrepo CI story
 
-→ Open https://gitlab.com/mirador1/mirador-service-java/-/pipelines.
+→ Open https://gitlab.com/iris-7/iris-service-java/-/pipelines.
 
 > "Every MR runs : compile, unit tests with JaCoCo coverage, integration
 > tests with testcontainers Postgres + Kafka + Redis + Keycloak, Spotless +
@@ -111,7 +111,7 @@ Watch Grafana :
 
 ### Minute 9-10 : The honest production-readiness checklist
 
-→ Open [`mirador-service-shared/docs/PRODUCTION-READINESS.md`](https://gitlab.com/mirador1/mirador-service-shared/blob/main/docs/PRODUCTION-READINESS.md).
+→ Open [`iris-service-shared/docs/PRODUCTION-READINESS.md`](https://gitlab.com/iris-7/iris-service-shared/blob/main/docs/PRODUCTION-READINESS.md).
 
 > "What this list demonstrates : every ✅ maps to a file. The 🟡 items
 > have honest caveats. The 🔴 items are what would actually need to

@@ -26,13 +26,13 @@ set -uo pipefail
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[0;33m'; CYAN='\033[0;36m'
 BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 
-GCP_PROJECT="${GCP_PROJECT:-mirador-portfolio-demo}"
-CLUSTER_NAME="${CLUSTER_NAME:-mirador-demo}"
+GCP_PROJECT="${GCP_PROJECT:-iris-portfolio-demo}"
+CLUSTER_NAME="${CLUSTER_NAME:-iris-demo}"
 CLUSTER_REGION="${CLUSTER_REGION:-europe-west1}"
 HOURLY_BURN_EUR="${HOURLY_BURN_EUR:-0.26}"   # GKE Autopilot baseline per ADR-0023
 
 snapshot() {
-  echo -e "${BOLD}Mirador GKE Autopilot status — $(date +%H:%M:%S)${NC}"
+  echo -e "${BOLD}Iris GKE Autopilot status — $(date +%H:%M:%S)${NC}"
   echo "  ─────────────────────────────────────────────────────────"
 
   if ! command -v gcloud >/dev/null 2>&1; then

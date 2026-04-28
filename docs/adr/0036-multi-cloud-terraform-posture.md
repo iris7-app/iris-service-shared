@@ -121,7 +121,7 @@ lesson learned).
   point instead of a blank page. Same for EU-sovereign mandates
   (Scaleway).
 - **Educational value.** The comment-heavy style makes each module
-  readable as a "cloud provider primer" independently of the mirador
+  readable as a "cloud provider primer" independently of the iris
   app.
 - **Low maintenance cost.** Reference modules are frozen once
   `terraform validate` passes — they don't drift with the app because

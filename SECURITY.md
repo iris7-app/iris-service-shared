@@ -2,10 +2,10 @@
 
 ## Reporting a vulnerability
 
-`mirador-service-shared` holds **infrastructure-as-code, observability
+`iris-service-shared` holds **infrastructure-as-code, observability
 config, CI templates, and cross-cutting documentation** for the
-[mirador1 project family](https://gitlab.com/mirador1). It's submoduled
-into `mirador-service-java` and `mirador-service-python` under
+[iris-7 project family](https://gitlab.com/iris-7). It's submoduled
+into `iris-service-java` and `iris-service-python` under
 `infra/shared/`.
 
 Vulnerabilities here can affect the consuming services if e.g. a Kubernetes
@@ -16,9 +16,9 @@ or a CI template leaks credentials.
 
 Report privately :
 
-- **Email** : security@mirador1.com (monitored)
+- **Email** : security@iris-7.com (monitored)
 - **GitLab** : open a
-  [confidential issue](https://gitlab.com/mirador1/mirador-service-shared/-/issues/new?issue[confidential]=true)
+  [confidential issue](https://gitlab.com/iris-7/iris-service-shared/-/issues/new?issue[confidential]=true)
 
 Include : repro / affected file path / SHA / your assessment.
 
@@ -42,8 +42,8 @@ In-scope :
 - Cross-cutting ADRs under `docs/adr/**`
 
 Out of scope :
-- The downstream service repos (mirador-service-java, mirador-service-python,
-  mirador-ui) — file separate reports there.
+- The downstream service repos (iris-service-java, iris-service-python,
+  iris-ui) — file separate reports there.
 - Third-party tools we wrap (Sloth, Argo CD, kube-prometheus-stack, etc).
 
 ## Security baseline
@@ -51,7 +51,7 @@ Out of scope :
 - **`.gitleaks.toml`** : checked in pre-commit + CI on the consuming repos.
 - **Sensitive variables** : never committed ; stored in GitLab CI/CD
   Variables (group-level for shared, project-level when project-specific).
-  See [CLAUDE.md "CI/CD variables hygiene"](https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/...) (in
+  See [CLAUDE.md "CI/CD variables hygiene"](https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/...) (in
   individual project repos).
 - **Pinned upstream references** : every Docker image, Helm chart, GitHub
   Action — `bin/ship/check-default-branch.sh` + `bin/dev/runner-healthcheck.sh`

@@ -5,7 +5,7 @@
 
 ## Context
 
-Building Mirador as a showcase of "industry-standard" platform practices
+Building Iris as a showcase of "industry-standard" platform practices
 runs into a tension: many industrial patterns cost money in their
 canonical managed form. A portfolio demo shouldn't burn a meaningful
 monthly bill just to show a stack it could run.
@@ -47,7 +47,7 @@ Outside the critical path there's a "nice to have" tier that the
 industry typically covers with managed SaaS products. For every one
 of those, an open-source self-hosted alternative exists — trading a
 ~€10–30/month/user bill against some extra operational complexity.
-Mirador aligns with the self-hosted option by default.
+Iris aligns with the self-hosted option by default.
 
 | Capability | SaaS (paid) | Self-hosted free alternative |
 |---|---|---|
@@ -69,7 +69,7 @@ negligible compared to the SaaS bill.
 | Pattern | Cost here | Why we still ship it |
 |---|---|---|
 | **External Secrets Operator + Google Secret Manager** | €0 (5 secrets, free tier) — ~€0.06/secret beyond 6 | Secret-rotation is a security posture, not a feature. GSM's free tier covers the current demo, with a clear cost curve if it grows. |
-| **cert-manager + Let's Encrypt** | €0 | TLS is a user-facing feature (`https://mirador1.duckdns.org`). Industrial minimum. |
+| **cert-manager + Let's Encrypt** | €0 | TLS is a user-facing feature (`https://iris7.duckdns.org`). Industrial minimum. |
 | **Argo CD (core subset)** | ~400m CPU + 900Mi RAM on existing nodes | GitOps is the feature being demonstrated. |
 | **Let's Encrypt cert via cert-manager** for Argo CD UI too | €0 | Avoids the "why does this cert look self-signed" question. |
 | **Workload Identity Federation** everywhere | €0 | Security posture; JSON-key approach would be strictly worse. |

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  com.mirador.ovh-budget.plist — daily OVH cost alert at 09:00 local.
+  com.iris.ovh-budget.plist — daily OVH cost alert at 09:00 local.
 
   Mirror of the GCP budget alert (which uses the native gcloud billing
   budgets mechanism). OVH has no equivalent native API, so this launchd
@@ -9,21 +9,21 @@
   notification when month-to-date spend exceeds the €5 threshold.
 
   Install:
-    cp bin/launchd/com.mirador.ovh-budget.plist ~/Library/LaunchAgents/
-    launchctl load -w ~/Library/LaunchAgents/com.mirador.ovh-budget.plist
+    cp bin/launchd/com.iris.ovh-budget.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/com.iris.ovh-budget.plist
 
   Remove:
-    launchctl unload -w ~/Library/LaunchAgents/com.mirador.ovh-budget.plist
-    rm ~/Library/LaunchAgents/com.mirador.ovh-budget.plist
+    launchctl unload -w ~/Library/LaunchAgents/com.iris.ovh-budget.plist
+    rm ~/Library/LaunchAgents/com.iris.ovh-budget.plist
 
   Inspect:
-    launchctl list | grep com.mirador.ovh-budget
-    cat /tmp/mirador-ovh-budget.log
+    launchctl list | grep com.iris.ovh-budget
+    cat /tmp/iris-ovh-budget.log
 -->
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.mirador.ovh-budget</string>
+  <string>com.iris.ovh-budget</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -32,7 +32,7 @@
     <string>-c</string>
     <!-- Runs from the svc repo root so REPO_ROOT resolves correctly.
          Sources the user's profile (-l) so OVH_* env vars are picked up. -->
-    <string>cd /Users/benoitbesson/dev/workspace-modern/mirador-service-java/infra/shared &amp;&amp; bin/budget/ovh-alert.sh --quiet</string>
+    <string>cd /Users/benoitbesson/dev/workspace-modern/iris-service-java/infra/shared &amp;&amp; bin/budget/ovh-alert.sh --quiet</string>
   </array>
 
   <key>StartCalendarInterval</key>
@@ -44,10 +44,10 @@
   </dict>
 
   <key>StandardOutPath</key>
-  <string>/tmp/mirador-ovh-budget.log</string>
+  <string>/tmp/iris-ovh-budget.log</string>
 
   <key>StandardErrorPath</key>
-  <string>/tmp/mirador-ovh-budget.log</string>
+  <string>/tmp/iris-ovh-budget.log</string>
 
   <key>RunAtLoad</key>
   <false/>

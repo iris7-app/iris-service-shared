@@ -1,7 +1,7 @@
 # =============================================================================
-# deploy/kubernetes/base/observability-prom/mirador-alerts.yaml
+# deploy/kubernetes/base/observability-prom/iris-alerts.yaml
 #
-# Prometheus recording + alerting rules for Mirador. Applied only by overlays
+# Prometheus recording + alerting rules for Iris. Applied only by overlays
 # that deploy kube-prometheus-stack (local-prom, gke-prom) — the PrometheusRule
 # CRD is provided by the operator, so this file can't sit in plain `base/`
 # without breaking overlays that don't run the operator (ADR-0038's lgtm-only
@@ -27,13 +27,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: mirador-alerts
+  name: iris-alerts
   labels:
     # Required for the operator's default ruleSelector (values-kube-prom-stack.yaml)
     # — missing either label = rules silently absent from Prometheus config.
     release: prometheus-stack
     role: alert-rules
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
 spec:
   groups:
     # ─────────────────────────────────────────────────────────────────────
@@ -41,120 +41,120 @@ spec:
     # the Grafana dashboards. Keeps dashboard PromQL + alert PromQL
     # consistent and the alert evaluator fast.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.recording
+    - name: iris.recording
       interval: 30s
       rules:
-        # Mirador HTTP RED metrics: rate, errors, duration — aggregated to
+        # Iris HTTP RED metrics: rate, errors, duration — aggregated to
         # the service level so alerts can compare against the whole
         # deployment without summing in each alert expression.
-        - record: mirador:http_requests:rate5m
-          expr: sum(rate(http_server_requests_seconds_count{job=~"mirador.*"}[5m]))
+        - record: iris:http_requests:rate5m
+          expr: sum(rate(http_server_requests_seconds_count{job=~"iris.*"}[5m]))
 
-        - record: mirador:http_errors:rate5m
+        - record: iris:http_errors:rate5m
           expr: |
-            sum(rate(http_server_requests_seconds_count{job=~"mirador.*",status=~"5.."}[5m]))
+            sum(rate(http_server_requests_seconds_count{job=~"iris.*",status=~"5.."}[5m]))
 
-        - record: mirador:http_error_ratio:5m
+        - record: iris:http_error_ratio:5m
           # Ratio of 5xx to total. Guard against divide-by-zero when the
           # service is idle (both numerator + denominator are 0) — PromQL's
           # `or vector(0)` substitutes an empty result with 0.
           expr: |
             (
-              mirador:http_errors:rate5m
+              iris:http_errors:rate5m
               /
-              mirador:http_requests:rate5m
+              iris:http_requests:rate5m
             ) or vector(0)
 
-        - record: mirador:http_request_duration:p95_5m
+        - record: iris:http_request_duration:p95_5m
           # Micrometer exposes histograms as `_bucket` — the operator's
           # histogram_quantile() works over `le` buckets. 5m window matches
           # the alert `for:` window so we don't flag transient spikes.
           expr: |
             histogram_quantile(0.95,
-              sum by (le) (rate(http_server_requests_seconds_bucket{job=~"mirador.*"}[5m]))
+              sum by (le) (rate(http_server_requests_seconds_bucket{job=~"iris.*"}[5m]))
             )
 
         # JVM heap pressure — ratio of used-to-max across all heap pools
-        # on the Mirador JVM. Used by the heap alert AND shown on the RED
+        # on the Iris JVM. Used by the heap alert AND shown on the RED
         # dashboard so the operator eyeballs the same number Prometheus
         # evaluates.
-        - record: mirador:jvm_heap:used_ratio
+        - record: iris:jvm_heap:used_ratio
           expr: |
-            sum(jvm_memory_used_bytes{job=~"mirador.*",area="heap"})
+            sum(jvm_memory_used_bytes{job=~"iris.*",area="heap"})
             /
-            sum(jvm_memory_max_bytes{job=~"mirador.*",area="heap"})
+            sum(jvm_memory_max_bytes{job=~"iris.*",area="heap"})
 
     # ─────────────────────────────────────────────────────────────────────
     # Availability + performance — critical page-worthy signals.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.availability
+    - name: iris.availability
       interval: 30s
       rules:
-        - alert: MiradorBackendDown
-          expr: up{job=~"mirador.*"} == 0
+        - alert: IrisBackendDown
+          expr: up{job=~"iris.*"} == 0
           for: 2m
           labels:
             severity: critical
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador backend {{ $labels.instance }} is DOWN'
+            summary: 'Iris backend {{ $labels.instance }} is DOWN'
             description: |
-              `up{job=~"mirador.*"}` has been 0 for ≥ 2 minutes on
+              `up{job=~"iris.*"}` has been 0 for ≥ 2 minutes on
               {{ $labels.instance }}. Prometheus can't scrape `/actuator/prometheus`
               — the pod is crashed, OOMKilled, or the sidecar is unresponsive.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/backend-down.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/backend-down.md
 
-        - alert: MiradorBackendAbsent
+        - alert: IrisBackendAbsent
           # `absent()` catches the case where ALL instances stop reporting
           # — `up == 0` fires only when we see a sample AND it's zero.
           # If the ServiceMonitor label selector misfires, we'd get no
           # samples at all → this alert is the backstop.
-          expr: absent(up{job=~"mirador.*"})
+          expr: absent(up{job=~"iris.*"})
           for: 5m
           labels:
             severity: critical
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador backend target list is EMPTY'
+            summary: 'Iris backend target list is EMPTY'
             description: |
-              No `up` series matching `{job=~"mirador.*"}` for ≥ 5 minutes.
+              No `up` series matching `{job=~"iris.*"}` for ≥ 5 minutes.
               Likely causes: the Deployment was scaled to 0, the
               ServiceMonitor lost its `release` label, or Prometheus can't
               resolve the Service DNS. Check `kubectl get endpoints -A |
-              grep mirador` and the operator's `-monitoring` logs.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/backend-down.md
+              grep iris` and the operator's `-monitoring` logs.
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/backend-down.md
 
-        - alert: MiradorHighErrorRate
-          expr: mirador:http_error_ratio:5m > 0.05
+        - alert: IrisHighErrorRate
+          expr: iris:http_error_ratio:5m > 0.05
           for: 5m
           labels:
             severity: critical
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador 5xx error rate >5% for 5 min'
+            summary: 'Iris 5xx error rate >5% for 5 min'
             description: |
-              The 5-minute rate of HTTP 5xx responses from Mirador is
+              The 5-minute rate of HTTP 5xx responses from Iris is
               {{ $value | humanizePercentage }} of total traffic.
               Likely causes: a DB outage, an LLM circuit-breaker flip
               (Ollama endpoint down), or a newly-shipped bug. Check the
               Grafana RED dashboard for per-endpoint breakdown.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/high-error-rate.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/high-error-rate.md
 
-    - name: mirador.latency
+    - name: iris.latency
       interval: 30s
       rules:
-        - alert: MiradorHighLatencyP95
-          expr: mirador:http_request_duration:p95_5m > 1
+        - alert: IrisHighLatencyP95
+          expr: iris:http_request_duration:p95_5m > 1
           for: 10m
           labels:
             severity: warning
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador p95 latency > 1s for 10 min'
+            summary: 'Iris p95 latency > 1s for 10 min'
             description: |
               p95 request duration is {{ printf "%.2f" $value }}s over the last
               5 minutes, sustained ≥ 10 min. The Aggregation endpoint
@@ -162,24 +162,24 @@ spec:
               the dominant endpoint, the alert is a real outage signal, not
               a slow-demo artefact. See the Sankey view on the diagnostic
               page to identify the hot endpoint.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/latency.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/latency.md
 
     # ─────────────────────────────────────────────────────────────────────
     # Resource saturation — warning-tier so the next-day triage catches it
     # before it turns into a paging outage.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.resources
+    - name: iris.resources
       interval: 60s
       rules:
-        - alert: MiradorHeapHigh
-          expr: mirador:jvm_heap:used_ratio > 0.85
+        - alert: IrisHeapHigh
+          expr: iris:jvm_heap:used_ratio > 0.85
           for: 10m
           labels:
             severity: warning
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador JVM heap > 85% used for 10 min'
+            summary: 'Iris JVM heap > 85% used for 10 min'
             description: |
               Heap usage is {{ $value | humanizePercentage }}. This is
               the yellow zone — the G1 collector starts concurrent GC at
@@ -187,30 +187,30 @@ spec:
               along with increased p95 latency, it's a memory-pressure
               slowdown, not a correctness bug. Check for leaking Caffeine
               caches (/actuator/caches) or an Observation span explosion.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/heap-pressure.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/heap-pressure.md
 
-        - alert: MiradorThreadContention
+        - alert: IrisThreadContention
           # >30% blocked threads over 5 min is the rule-of-thumb "something
           # is locked" signal. Works for both virtual-thread carrier
           # threads and platform threads — Micrometer doesn't distinguish.
           expr: |
-            sum(jvm_threads_states_threads{job=~"mirador.*",state="blocked"})
+            sum(jvm_threads_states_threads{job=~"iris.*",state="blocked"})
             /
-            sum(jvm_threads_states_threads{job=~"mirador.*"})
+            sum(jvm_threads_states_threads{job=~"iris.*"})
             > 0.30
           for: 5m
           labels:
             severity: warning
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador >30% of JVM threads BLOCKED for 5 min'
+            summary: 'Iris >30% of JVM threads BLOCKED for 5 min'
             description: |
               {{ $value | humanizePercentage }} of JVM threads are in
               BLOCKED state. Usually a `synchronized` contention or a
               `Lock.lock()` not released — run Pyroscope's lock profile
               to identify the monitor (`lock` profile type).
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/thread-contention.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/thread-contention.md
 
     # ─────────────────────────────────────────────────────────────────────
     # Kafka — only fires when spring-kafka metrics are present. On an
@@ -218,28 +218,28 @@ spec:
     # series don't exist and the alert expressions evaluate to empty —
     # Prometheus treats that as "not firing", no noise.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.kafka
+    - name: iris.kafka
       interval: 30s
       rules:
-        - alert: MiradorKafkaConsumerLagHigh
+        - alert: IrisKafkaConsumerLagHigh
           # Spring-kafka emits kafka_consumer_fetch_manager_records_lag with
           # per-partition labels. Max-over-all-partitions is the signal —
           # averaging hides single-partition stalls.
-          expr: max(kafka_consumer_fetch_manager_records_lag{job=~"mirador.*"}) > 1000
+          expr: max(kafka_consumer_fetch_manager_records_lag{job=~"iris.*"}) > 1000
           for: 5m
           labels:
             severity: warning
             team: platform
-            service: mirador-backend
+            service: iris-backend
           annotations:
-            summary: 'Mirador Kafka consumer lag > 1000 for 5 min'
+            summary: 'Iris Kafka consumer lag > 1000 for 5 min'
             description: |
               Max consumer lag is {{ $value }} records across all
               partitions. Either the consumer is stuck (DLT poison pill?)
               or the producer ramped faster than the consumer can keep up.
               Check /actuator/health for `kafkaConsumer` UP and the Kafka
               UI ($KAFKA_UI_URL) for partition assignment.
-            runbook_url: https://github.com/mirador1/mirador-service/blob/main/docs/ops/runbooks/kafka-lag.md
+            runbook_url: https://github.com/iris-7/iris-service/blob/main/docs/ops/runbooks/kafka-lag.md
 
     # ─────────────────────────────────────────────────────────────────────
     # Meta — alerts about the alert pipeline itself. Two failure modes:
@@ -247,23 +247,23 @@ spec:
     #   2. The alert config drift: rules were applied but mark nothing
     #      — often a label-selector typo caught only by testing.
     # ─────────────────────────────────────────────────────────────────────
-    - name: mirador.meta
+    - name: iris.meta
       interval: 60s
       rules:
-        - alert: MiradorAlertRulesStale
+        - alert: IrisAlertRulesStale
           # If a rule group's last evaluation is > 5 min old, the operator
           # failed to reload config. Our `release` label targeting is
           # brittle enough to want a canary here.
           expr: |
             time() - prometheus_rule_group_last_evaluation_timestamp_seconds{
-              rule_group=~"mirador\\..*"
+              rule_group=~"iris\\..*"
             } > 300
           for: 5m
           labels:
             severity: warning
             team: platform
           annotations:
-            summary: 'Mirador alert rules stale > 5 min'
+            summary: 'Iris alert rules stale > 5 min'
             description: |
               Rule group {{ $labels.rule_group }} last evaluated > 5 min
               ago. Prometheus reloaded without picking up our rules —

@@ -3,5 +3,5 @@ kind: Kustomization
 
 resources:
   - secretstore.yaml
-  - externalsecret-mirador.yaml
+  - externalsecret-iris.yaml
   - externalsecret-keycloak.yaml

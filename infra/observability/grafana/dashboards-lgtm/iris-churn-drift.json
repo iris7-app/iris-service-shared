@@ -27,7 +27,7 @@
       "title": "Drift runbook",
       "tooltip": "Open the Phase E drift SLO runbook",
       "type": "link",
-      "url": "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
+      "url": "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/ml/drift-slo-runbook.md"
     },
     {
       "asDropdown": false,
@@ -39,7 +39,7 @@
       "title": "Customer Churn ADR",
       "tooltip": "Open shared ADR-0061",
       "type": "link",
-      "url": "https://gitlab.com/mirador1/mirador-service-shared/-/blob/main/docs/adr/0061-customer-churn-prediction.md"
+      "url": "https://gitlab.com/iris-7/iris-service-shared/-/blob/main/docs/adr/0061-customer-churn-prediction.md"
     },
     {
       "asDropdown": false,
@@ -90,7 +90,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "mirador:churn_drift:ks_stat:max{model=\"customer-churn-mlp\"}",
+          "expr": "iris:churn_drift:ks_stat:max{model=\"customer-churn-mlp\"}",
           "legendFormat": "max KS-stat",
           "refId": "A"
         }
@@ -172,7 +172,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "mirador:churn_drift:freshness_seconds",
+          "expr": "iris:churn_drift:freshness_seconds",
           "legendFormat": "age",
           "refId": "A"
         }
@@ -219,7 +219,7 @@
       "targets": [
         {
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "expr": "mirador_churn_drift_ks_stat{model=\"customer-churn-mlp\"}",
+          "expr": "iris_churn_drift_ks_stat{model=\"customer-churn-mlp\"}",
           "legendFormat": "{{feature}}",
           "refId": "A"
         }
@@ -291,13 +291,13 @@
   ],
   "refresh": "5m",
   "schemaVersion": 39,
-  "tags": ["mirador", "ml", "slo", "churn"],
+  "tags": ["iris", "ml", "slo", "churn"],
   "templating": {"list": []},
   "time": {"from": "now-30d", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
   "title": "Customer Churn — model drift (Phase E)",
-  "uid": "mirador-churn-drift",
+  "uid": "iris-churn-drift",
   "version": 1,
   "weekStart": ""
 }
