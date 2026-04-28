@@ -1,6 +1,6 @@
 # ADR-0064 : `Customer` domain rename — analysis, alternatives, migration plan
 
-**Status** : Proposed (analysis only — decision deferred to user)
+**Status** : Rejected — keep `Customer` (decision recorded 2026-04-28)
 **Date** : 2026-04-28
 **Sibling repos** :
 - `iris-service-java` — JPA entity `Customer`, package `com.iris.customer.*`, Flyway V1/V3/R-seed, MCP tools `get_customer_360`/`predict_customer_churn`, Kafka `KafkaCustomerEventPublisher`
