@@ -4,34 +4,15 @@ Open work only. Per `~/.claude/CLAUDE.md` rules : shared infra
 (K8s / Terraform / dashboards / observability / cross-cutting ADRs)
 items only. Done items removed (use `git tag -l` for history).
 
-Created 2026-04-28 to capture the **Iris rebrand** + RPO measurement
-follow-ups.
-
 ---
 
-## 🌀 IRIS REBRAND (in flight 2026-04-28)
+## 🟡 GKE cluster Terraform rename (deferred)
 
-Coordinated rename Iris → Iris. See full context + phases in
-[Java TASKS.md](https://gitlab.com/iris-7/iris-service-java/-/blob/main/TASKS.md#-iris-rebrand-in-flight-2026-04-28).
-
-Shared-side scope :
-
-- **Code-level** : 91 files, 722 refs to "iris". Affects :
-  - K8s manifests : `@@KEEP_IRIS_PROD@@` cluster name, `iris-secrets`,
-    `iris-config`, postgres/kafka/redis labels, namespace labels
-  - Helm charts : `iris-app` chart name → `iris-app`
-  - Terraform : `@@KEEP_IRIS_PROD@@` GKE cluster (rename = recreate)
-  - Grafana dashboard JSON : titles + panel descriptions
-  - OTel collector configs : resource attributes
-  - ADR cross-references : ~30 ADRs reference "Iris"
-- **Phase 4 (code/manifest rename)** : 🔴 dedicated session.
-
-### ✅ Decisions verrouillées
-
-Same as the master rebrand record (see Java TASKS.md). Visual
-locked = `02o-iris-final.svg`. Tagline = `7 FACETS`.
-
----
+The Terraform module name is still `mirador-prod` but the rebrand
+points to `iris-prod`. Renaming a GKE cluster in Terraform is a
+**destructive recreate** (delete-then-create) — not in scope today.
+When ready, plan + apply during a maintenance window with downtime
+budget. Until then, the cluster keeps the old name internally.
 
 ## 📊 RPO measurement (paused 2026-04-28)
 
