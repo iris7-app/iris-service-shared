@@ -1,4 +1,4 @@
-# iris-service-shared
+![iris-service-shared](docs/assets/banner.svg)
 
 [![BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue)](LICENSE)
 ![Sloth SLO](https://img.shields.io/badge/Sloth-SLO_rules-2D7FF9)
