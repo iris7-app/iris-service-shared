@@ -8,7 +8,7 @@ items only. Done items removed (use `git tag -l` for history).
 
 ## 🟡 GKE cluster Terraform rename (deferred)
 
-The Terraform module name is still `mirador-prod` but the rebrand
+The Terraform module name is still `iris7-prod` but the rebrand
 points to `iris-prod`. Renaming a GKE cluster in Terraform is a
 **destructive recreate** (delete-then-create) — not in scope today.
 When ready, plan + apply during a maintenance window with downtime

@@ -1,5 +1,5 @@
 # =============================================================================
-# Terraform — OVH Cloud private network (vRack) for the Mirador cluster
+# Terraform — OVH Cloud private network (vRack) for the Iris cluster
 #
 # What is vRack?
 # ──────────────
@@ -30,8 +30,8 @@
 #     (ovh_cloud_project_kube provisions a default route via the public
 #     NIC). NAT Gateway is needed if HDS audit demands no public IP on
 #     workload nodes.
-#   - **Cross-vRack peering** — multi-cluster OVH setups (e.g. mirador-
-#     prod + mirador-staging in different regions) would peer their vRacks.
+#   - **Cross-vRack peering** — multi-cluster OVH setups (e.g. iris-
+#     prod + iris7-staging in different regions) would peer their vRacks.
 #     Single cluster today, no peering needed.
 #
 # Cost breakdown:
@@ -65,7 +65,7 @@
 #                 with Managed K8s. Ask OVH support to migrate.
 # Related     : OVH docs — https://docs.ovh.com/gb/en/private-cloud/configure_vrack/
 # =============================================================================
-data "ovh_cloud_project_vrack" "mirador" {
+data "ovh_cloud_project_vrack" "iris" {
   service_name = var.ovh_project_id
 }
 
@@ -93,9 +93,9 @@ data "ovh_cloud_project_vrack" "mirador" {
 #                 200, 300, etc.
 #               - Renaming the network forces destroy + recreate. Pick a
 #                 name once and stick with it.
-# Related     : main.tf::ovh_cloud_project_kube.mirador.private_network_id
+# Related     : main.tf::ovh_cloud_project_kube.iris.private_network_id
 # =============================================================================
-resource "ovh_cloud_project_network_private" "mirador" {
+resource "ovh_cloud_project_network_private" "iris" {
   service_name = var.ovh_project_id
   name         = "${var.cluster_name}-private"
   regions      = [var.region]
@@ -107,7 +107,7 @@ resource "ovh_cloud_project_network_private" "mirador" {
 #               actual address range nodes get IPs from.
 # Why         : OVH separates the network (L2) from the subnet (L3) so the
 #               same vRack can host multiple subnets (different IP ranges
-#               for different workloads). For Mirador we just need one
+#               for different workloads). For Iris we just need one
 #               subnet on this network.
 #
 #               start / end: defines the DHCP range. We allocate
@@ -128,11 +128,11 @@ resource "ovh_cloud_project_network_private" "mirador" {
 #               - DHCP range must NOT include the gateway IP (192.168.100.1).
 #                 OVH's API rejects such ranges with a non-obvious "Bad
 #                 Request" error.
-# Related     : main.tf::ovh_cloud_project_kube.mirador.nodes_subnet_id
+# Related     : main.tf::ovh_cloud_project_kube.iris.nodes_subnet_id
 # =============================================================================
-resource "ovh_cloud_project_network_private_subnet" "mirador" {
+resource "ovh_cloud_project_network_private_subnet" "iris" {
   service_name = var.ovh_project_id
-  network_id   = ovh_cloud_project_network_private.mirador.id
+  network_id   = ovh_cloud_project_network_private.iris.id
   region       = var.region
 
   start    = "192.168.100.10"

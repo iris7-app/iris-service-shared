@@ -5,10 +5,10 @@
 # In CI, use TF_VAR_* environment variables instead of a tfvars file.
 #
 # Fill in exactly the three required variables; the rest have sensible
-# defaults in variables.tf (region = europe-west1, cluster_name = mirador-prod).
+# defaults in variables.tf (region = europe-west1, cluster_name = iris7-prod).
 # =============================================================================
 
-# Required — GCP project ID (see CLAUDE.md for the mirador project).
+# Required — GCP project ID (see CLAUDE.md for the iris project).
 project_id   = "your-gcp-project-id"
 
 # Optional — defaults to europe-west1 (see ADR-0030). Only override if you
@@ -16,12 +16,12 @@ project_id   = "your-gcp-project-id"
 # DuckDNS record, Artifact Registry location) assumes this region.
 region       = "europe-west1"
 
-# Optional — defaults to mirador-prod. CI variable GKE_CLUSTER must match.
-cluster_name = "mirador"
+# Optional — defaults to iris7-prod. CI variable GKE_CLUSTER must match.
+cluster_name = "iris"
 
 # Required — public hostname served by the ingress. Must match the DuckDNS
 # A record (or equivalent DNS) and the cert-manager Certificate resource.
-app_host     = "mirador.yourdomain.com"
+app_host     = "iris.yourdomain.com"
 
 # =============================================================================
 # Stale leftovers — below this line the variables no longer exist in
@@ -31,7 +31,7 @@ app_host     = "mirador.yourdomain.com"
 # with older commits / the archived reactivation runbook at
 # docs/archive/terraform-deferred/.
 # =============================================================================
-# db_name     = "mirador"
+# db_name     = "iris"
 # db_user     = "demo"
 # db_password = "CHANGE_ME_strong_password_here"
 # db_tier     = "db-f1-micro"   # dev: db-f1-micro (~$7/mo) | prod: db-n1-standard-1 (~$50/mo)

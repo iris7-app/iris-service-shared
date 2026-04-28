@@ -1,7 +1,7 @@
 # `terraform/gcp/` — Google Cloud infrastructure module
 
 This module provisions the **full production stack on Google Cloud** for
-mirador-service: network, compute cluster, managed database, cache, and
+iris-service-java: network, compute cluster, managed database, cache, and
 IAM bindings for Workload Identity.
 
 ## What gets provisioned
@@ -10,21 +10,21 @@ Running `terraform apply` in this directory creates:
 
 | Resource                                    | Purpose                                                                 | Default tier            | Approx. cost (EU) |
 | ------------------------------------------- | ----------------------------------------------------------------------- | ----------------------- | ----------------- |
-| `google_compute_network.vpc`                | Custom VPC (`mirador-vpc`) — no auto subnets, enables private service access. | —                       | Free              |
-| `google_compute_subnetwork.subnet`           | Subnet `mirador-subnet` (10.0.0.0/20) with secondary ranges for GKE pods and services. | —                       | Free              |
+| `google_compute_network.vpc`                | Custom VPC (`iris-vpc`) — no auto subnets, enables private service access. | —                       | Free              |
+| `google_compute_subnetwork.subnet`           | Subnet `iris-subnet` (10.0.0.0/20) with secondary ranges for GKE pods and services. | —                       | Free              |
 | `google_compute_global_address.private_ip_range` + `google_service_networking_connection` | Private Service Access peering — needed for Cloud SQL and Memorystore to have private IPs reachable from GKE. | —                       | Free              |
 | `google_compute_router` + `google_compute_router_nat` | Cloud NAT so private GKE nodes can reach the public internet (pull images, reach external APIs) without a public IP. | `AUTO_ONLY`             | ~$1/mo + $0.045/GB egress |
-| `google_container_cluster.autopilot`         | GKE Autopilot cluster (`mirador-prod`) — private nodes, public control plane, Workload Identity enabled, REGULAR release channel. | —                       | ~$0.10/hr control plane + per-pod billing |
+| `google_container_cluster.autopilot`         | GKE Autopilot cluster (`iris7-prod`) — private nodes, public control plane, Workload Identity enabled, REGULAR release channel. | —                       | ~$0.10/hr control plane + per-pod billing |
 | `google_sql_database_instance.postgres`      | Cloud SQL Postgres 17, private IP only, PITR enabled, 7-day backups.    | `db-f1-micro`           | ~$7/mo (dev) · ~$50/mo (`db-n1-standard-1` for prod) |
-| `google_sql_database.mirador` + `google_sql_user.app_user` | Application database `mirador` and user `demo`.                        | —                       | Free              |
+| `google_sql_database.iris` + `google_sql_user.app_user` | Application database `iris` and user `demo`.                        | —                       | Free              |
 | `google_service_account.sql_proxy`           | SA impersonated by the Cloud SQL Auth Proxy sidecar in the backend pod. | —                       | Free              |
 | `google_project_iam_member.sql_proxy_role`   | Grants `roles/cloudsql.client` to the proxy SA.                         | —                       | Free              |
-| `google_service_account_iam_member.workload_identity_binding` | Binds the K8s service account `app/mirador-backend` to the GCP proxy SA via Workload Identity. | —                       | Free              |
+| `google_service_account_iam_member.workload_identity_binding` | Binds the K8s service account `app/iris-backend` to the GCP proxy SA via Workload Identity. | —                       | Free              |
 | `google_redis_instance.cache`                 | Memorystore Redis 7.2, private service access, `BASIC` tier (no replica). | `BASIC`, 1 GB           | ~$16/mo (basic) · ~$40/mo (`STANDARD_HA` for prod) |
 | *(optional, off by default)* `google_managed_kafka_cluster` | Managed Kafka cluster — opt-in via `kafka_enabled = true` in tfvars. See `kafka.tf`. | —                       | ~$35/day for 3 brokers × 3 vCPU |
 
 **Total baseline cost for dev**: ~$25/month with everything running. Pause Cloud SQL
-(`gcloud sql instances patch mirador-db --activation-policy=NEVER`) to drop to
+(`gcloud sql instances patch iris-db --activation-policy=NEVER`) to drop to
 ~$18/month when not actively testing.
 
 ## Files in this directory
@@ -79,7 +79,7 @@ Local dry-run:
 ```bash
 terraform init \
   -backend-config="bucket=${GCP_PROJECT}-tf-state" \
-  -backend-config="prefix=mirador/gcp"
+  -backend-config="prefix=iris/gcp"
 terraform plan
 ```
 

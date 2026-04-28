@@ -1,5 +1,5 @@
 # =============================================================================
-# Terraform variables — GCP infrastructure for mirador
+# Terraform variables — GCP infrastructure for iris
 #
 # Set values in terraform/gcp/terraform.tfvars (not committed to Git)
 # or via TF_VAR_* environment variables in CI.
@@ -24,7 +24,7 @@
 #               project ID has a specific format (`<word>-<12-hex>-<12-hex>`
 #               when auto-generated), distinct from the display name.
 # Cost        : n/a (identifier)
-# Gotchas     : - The mirador portfolio project ID is
+# Gotchas     : - The iris portfolio project ID is
 #                 `project-8d6ea68c-33ac-412b-8aa` (see CLAUDE.md). Missing
 #                 the final char is a common typo — copy-paste don't retype.
 #               - Changing this variable post-apply forces destruction of
@@ -63,7 +63,7 @@ variable "region" {
 # =============================================================================
 # Role        : GKE cluster name — becomes the kubectl context name and
 #               appears in `gcloud container clusters get-credentials`.
-# Why         : Default `mirador-prod` matches the `GKE_CLUSTER` CI variable
+# Why         : Default `iris7-prod` matches the `GKE_CLUSTER` CI variable
 #               in `.gitlab-ci.yml`, so `deploy:gke` can fetch credentials
 #               with `gcloud container clusters get-credentials $GKE_CLUSTER`
 #               without needing a separate `TF_VAR_cluster_name` override.
@@ -77,7 +77,7 @@ variable "region" {
 variable "cluster_name" {
   description = "Name of the GKE Autopilot cluster"
   type        = string
-  default     = "mirador-prod"
+  default     = "iris7-prod"
   # Matches the GKE_CLUSTER CI variable so deploy:gke can fetch credentials
   # with `gcloud container clusters get-credentials $GKE_CLUSTER` without
   # needing a separate TF_VAR_cluster_name override.
@@ -102,6 +102,6 @@ variable "cluster_name" {
 #               src/main/resources/application.yml (spring.web.cors.*).
 # =============================================================================
 variable "app_host" {
-  description = "Public hostname for the application (used in Ingress and CORS). E.g. mirador.example.com"
+  description = "Public hostname for the application (used in Ingress and CORS). E.g. iris.example.com"
   type        = string
 }

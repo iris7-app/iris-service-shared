@@ -1,10 +1,10 @@
 # =============================================================================
-# Terraform — GCP infrastructure for mirador (ephemeral demo cluster)
+# Terraform — GCP infrastructure for iris (ephemeral demo cluster)
 #
 # IaC posture after ADR-0013 + ADR-0021 + ADR-0022 (ephemeral cluster):
 #
 #   MANAGED BY TERRAFORM NOW:
-#     - GKE Autopilot cluster `mirador-prod` (on the project's default VPC).
+#     - GKE Autopilot cluster `iris7-prod` (on the project's default VPC).
 #     - Workload Identity pool is implicit via enable_autopilot.
 #
 #   DELIBERATELY DROPPED:

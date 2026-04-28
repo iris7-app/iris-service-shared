@@ -1,5 +1,5 @@
 # =============================================================================
-# Terraform variables — OVH Cloud module for mirador
+# Terraform variables — OVH Cloud module for iris
 #
 # Set values in deploy/terraform/ovh/terraform.tfvars (NEVER committed)
 # OR via TF_VAR_* environment variables in CI.
@@ -135,18 +135,18 @@ variable "region" {
 
 # =============================================================================
 # Role        : Cluster display name (visible in OVH manager + kubeconfig).
-# Why         : `mirador-prod` matches the GCP module's cluster name —
+# Why         : `iris7-prod` matches the GCP module's cluster name —
 #               keeps the deploy story consistent across clouds. Override
 #               for staging / preview clusters.
 # Cost        : n/a (label).
 # Gotchas     : - Cannot be changed in-place (OVH treats it as a force-replace).
 #               - Stays under 30 chars (OVH validates).
-# Related     : main.tf::ovh_cloud_project_kube.mirador.name
+# Related     : main.tf::ovh_cloud_project_kube.iris.name
 # =============================================================================
 variable "cluster_name" {
   description = "Cluster display name (max 30 chars, no spaces)"
   type        = string
-  default     = "mirador-prod"
+  default     = "iris7-prod"
 
   validation {
     condition     = length(var.cluster_name) <= 30 && !can(regex("[ \\t]", var.cluster_name))
@@ -174,14 +174,14 @@ variable "k8s_version" {
 # =============================================================================
 # Role        : The instance flavor for nodes in the default node pool.
 # Why         : B2-7 = 2 vCPU + 7 GB RAM, ~€25/month per node. Sweet spot
-#               for the Mirador stack (Spring Boot + Postgres + Kafka +
+#               for the Iris stack (Spring Boot + Postgres + Kafka +
 #               Ollama small + LGTM ≈ 5 GB total, leaves ~2 GB headroom).
 #
 #               Alternatives:
 #                 - B2-15 (2 vCPU / 15 GB) ~€42/month — if Ollama pulls a
 #                   bigger model (llama3.1 8B needs ~6 GB extra)
 #                 - C2-7 (4 vCPU / 7 GB) ~€36/month — CPU-bound workloads
-#                 - D2-2 (2 vCPU / 2 GB) ~€10/month — DOESN'T fit Mirador
+#                 - D2-2 (2 vCPU / 2 GB) ~€10/month — DOESN'T fit Iris
 #                   (memory exhausted before the cluster comes up)
 # Cost        : €25.20/month per node always-on.
 # Gotchas     : - Cannot be changed in-place; OVH replaces the node pool

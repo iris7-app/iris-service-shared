@@ -1,5 +1,5 @@
 # =============================================================================
-# Terraform — OVH Cloud infrastructure for mirador
+# Terraform — OVH Cloud infrastructure for iris
 #
 # Status: CANONICAL / STAGE 1 — applied via CI on demand (when:manual gate
 # until first credentials are wired). Per ADR-0053, OVH joins GCP at the
@@ -25,7 +25,7 @@
 #
 # What this module provisions:
 #   - OVH Public Cloud project (assumes one already exists — see README)
-#   - Managed Kubernetes cluster `mirador-prod` in GRA9 (Gravelines, France)
+#   - Managed Kubernetes cluster `iris7-prod` in GRA9 (Gravelines, France)
 #   - Single node pool of 1× B2-7 instances (2 vCPU / 7 GB RAM)
 #   - Private network attachment via vRack (see network.tf)
 #
@@ -87,7 +87,7 @@ terraform {
 #               Required permissions: GET/POST/PUT/DELETE on /cloud/project/*
 #
 #               Endpoint: ovh-eu (vs ovh-us / ovh-ca for other geos).
-#               Mirador is EU-only (GRA9 = France); ovh-eu is the right
+#               Iris is EU-only (GRA9 = France); ovh-eu is the right
 #               endpoint and the implicit default in the provider when
 #               OVH_ENDPOINT is unset, but pinning here is intentional.
 # Cost        : n/a (metadata only).
@@ -134,7 +134,7 @@ provider "ovh" {
 #               resource (see below).
 # Gotchas     : - `name` cannot be changed after apply — destroy + recreate
 #                 if a rename is needed. Follow the convention
-#                 `mirador-<env>` (mirador-prod, mirador-staging).
+#                 `iris-<env>` (iris7-prod, iris7-staging).
 #               - The cluster is region-bound. To move regions
 #                 (GRA9 → SBG5 for instance) requires destroy + recreate.
 #                 The cluster's HDS certification status follows the
@@ -142,7 +142,7 @@ provider "ovh" {
 #                 GRA7 / WAW1 are NOT.
 # Related     : variables.tf::region (defaults GRA9), README.md § "HDS".
 # =============================================================================
-resource "ovh_cloud_project_kube" "mirador" {
+resource "ovh_cloud_project_kube" "iris" {
   service_name = var.ovh_project_id
   name         = var.cluster_name
   region       = var.region
@@ -160,14 +160,14 @@ resource "ovh_cloud_project_kube" "mirador" {
   # with "Private network pn-1310613_100 is not a correct uuid" before
   # this fix. See OVH provider issue github.com/ovh/terraform-provider-ovh/issues/355
   private_network_id = one([
-    for a in ovh_cloud_project_network_private.mirador.regions_attributes :
+    for a in ovh_cloud_project_network_private.iris.regions_attributes :
     a.openstackid if a.region == var.region
   ])
 
   # Required when private_network_id is set: the gateway IP for the
   # subnet the nodes attach to. Computed in network.tf and exposed as
   # a constant the K8s control plane wires up.
-  nodes_subnet_id = ovh_cloud_project_network_private_subnet.mirador.id
+  nodes_subnet_id = ovh_cloud_project_network_private_subnet.iris.id
 }
 
 # =============================================================================
@@ -177,7 +177,7 @@ resource "ovh_cloud_project_kube" "mirador" {
 #               grows enough to need taints/tolerations.
 #
 #               flavor_name: B2-7 = 2 vCPU + 7 GB RAM, ~€25/month.
-#               Cheapest viable node — Mirador's full stack (Spring Boot
+#               Cheapest viable node — Iris's full stack (Spring Boot
 #               + Postgres + Kafka + Ollama small model + LGTM) needs at
 #               least 4 GB usable, leaves ~2 GB headroom on B2-7.
 #
@@ -205,7 +205,7 @@ resource "ovh_cloud_project_kube" "mirador" {
 # =============================================================================
 resource "ovh_cloud_project_kube_nodepool" "default" {
   service_name  = var.ovh_project_id
-  kube_id       = ovh_cloud_project_kube.mirador.id
+  kube_id       = ovh_cloud_project_kube.iris.id
   name          = "default"
   flavor_name   = var.node_flavor
   desired_nodes = var.node_count_desired

@@ -12,7 +12,7 @@
 
 # =============================================================================
 # Role        : Cluster name, echoed for scripts that need it verbatim.
-# Why         : Avoids hardcoding `mirador-prod` in bin/cluster/demo/up.sh —
+# Why         : Avoids hardcoding `iris7-prod` in bin/cluster/demo/up.sh —
 #               the script reads this output so renaming the cluster via
 #               var.cluster_name propagates automatically.
 # Cost        : n/a (string)

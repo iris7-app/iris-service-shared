@@ -9,7 +9,7 @@
 # Then run:
 #   terraform init \
 #     -backend-config="bucket=${project_id}-tf-state" \
-#     -backend-config="prefix=mirador/gcp"
+#     -backend-config="prefix=iris/gcp"
 #
 # Related:
 #   - main.tf     — cluster resources that get serialised into this state
@@ -35,7 +35,7 @@
 # Gotchas     : - The bucket is NOT managed by Terraform (chicken-and-egg:
 #                 you can't store the state that manages the bucket in
 #                 the same bucket). Create it manually once per project.
-#               - `prefix = mirador/gcp` — changing this creates a new,
+#               - `prefix = iris/gcp` — changing this creates a new,
 #                 empty state and Terraform will want to recreate every
 #                 resource. Treat as a one-time decision.
 #               - Removing backend config entirely would silently switch

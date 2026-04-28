@@ -46,7 +46,7 @@ terraform {
   #     s3 = "https://s3.gra.io.cloud.ovh.net"
   #   }
   #   region                      = "gra"
-  #   bucket                      = "mirador-tfstate"
+  #   bucket                      = "iris-tfstate"
   #   key                         = "ovh/terraform.tfstate"
   #
   #   # OVH-specific S3 quirks — REQUIRED for the backend to work :

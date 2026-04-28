@@ -1,5 +1,5 @@
 # =============================================================================
-# Terraform outputs — OVH module for mirador
+# Terraform outputs — OVH module for iris
 #
 # What gets exported (and why callers need each):
 #   - cluster_id      → for `bin/cluster/ovh-up.sh` / `ovh-down.sh` to
@@ -14,7 +14,7 @@
 #   - kubeconfig      → SENSITIVE — the full kubeconfig YAML for kubectl.
 #                       Mark sensitive so it doesn't print in plan / apply
 #                       output by default. Use `terraform output -raw
-#                       kubeconfig > ~/.kube/ovh-mirador.yaml` to write it.
+#                       kubeconfig > ~/.kube/ovh-iris.yaml` to write it.
 #   - private_network_id → for stage-2 use cases that attach more
 #                          resources (DBs, additional clusters) to the
 #                          same vRack subnet.
@@ -27,28 +27,28 @@
 
 output "cluster_id" {
   description = "OVH-assigned ID of the Managed K8s cluster (UUID-like string)"
-  value       = ovh_cloud_project_kube.mirador.id
+  value       = ovh_cloud_project_kube.iris.id
 }
 
 output "cluster_name" {
   description = "Human-readable cluster name (from var.cluster_name)"
-  value       = ovh_cloud_project_kube.mirador.name
+  value       = ovh_cloud_project_kube.iris.name
 }
 
 output "cluster_url" {
   description = "Control plane endpoint URL (HTTPS, used by kubectl)"
-  value       = ovh_cloud_project_kube.mirador.url
+  value       = ovh_cloud_project_kube.iris.url
 }
 
 output "region" {
   description = "OVH region the cluster is deployed in (echoed for confirmation)"
-  value       = ovh_cloud_project_kube.mirador.region
+  value       = ovh_cloud_project_kube.iris.region
 }
 
 # =============================================================================
-# Role        : Full kubeconfig YAML — drop into ~/.kube/ovh-mirador.yaml
+# Role        : Full kubeconfig YAML — drop into ~/.kube/ovh-iris.yaml
 #               and switch context with `kubectl config use-context
-#               kubernetes-admin@mirador-prod` (the user/context name OVH
+#               kubernetes-admin@iris7-prod` (the user/context name OVH
 #               assigns).
 # Why         : Mark sensitive=true so this doesn't render in plain text
 #               on the apply output (terraform redacts sensitive outputs).
@@ -61,22 +61,22 @@ output "region" {
 #               - The cert expires after 1 year. OVH auto-rotates it on
 #                 the cluster side; re-run `terraform apply` to refresh
 #                 the local copy before expiry.
-# Related     : bin/cluster/ovh-up.sh writes this to ~/.kube/ovh-mirador.yaml.
+# Related     : bin/cluster/ovh-up.sh writes this to ~/.kube/ovh-iris.yaml.
 # =============================================================================
 output "kubeconfig" {
   description = "Full kubeconfig YAML for kubectl (treat as root password)"
-  value       = ovh_cloud_project_kube.mirador.kubeconfig
+  value       = ovh_cloud_project_kube.iris.kubeconfig
   sensitive   = true
 }
 
 output "private_network_id" {
   description = "vRack private network ID (for stage-2 resources sharing the network)"
-  value       = ovh_cloud_project_network_private.mirador.id
+  value       = ovh_cloud_project_network_private.iris.id
 }
 
 output "nodes_subnet_id" {
   description = "Private subnet ID where K8s nodes are placed"
-  value       = ovh_cloud_project_network_private_subnet.mirador.id
+  value       = ovh_cloud_project_network_private_subnet.iris.id
 }
 
 # =============================================================================

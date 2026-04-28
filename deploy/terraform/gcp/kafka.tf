@@ -123,9 +123,9 @@ variable "kafka_memory_gb_per_broker" {
 #               override), ADR-0005 (what we deferred).
 # =============================================================================
 #
-# resource "google_managed_kafka_cluster" "mirador" {
+# resource "google_managed_kafka_cluster" "iris" {
 #   count    = var.kafka_enabled ? 1 : 0
-#   cluster_id = "mirador-kafka"
+#   cluster_id = "iris-kafka"
 #   location   = var.region
 #   project    = var.project_id
 #
@@ -137,19 +137,19 @@ variable "kafka_memory_gb_per_broker" {
 #   gcp_config {
 #     access_config {
 #       network_configs {
-#         subnet = "projects/${var.project_id}/regions/${var.region}/subnetworks/mirador-subnet"
+#         subnet = "projects/${var.project_id}/regions/${var.region}/subnetworks/iris-subnet"
 #       }
 #     }
 #   }
 #
 #   labels = {
-#     "app" = "mirador"
+#     "app" = "iris"
 #   }
 # }
 #
 # resource "google_managed_kafka_topic" "customer_request" {
 #   count     = var.kafka_enabled ? 1 : 0
-#   cluster   = google_managed_kafka_cluster.mirador[0].cluster_id
+#   cluster   = google_managed_kafka_cluster.iris[0].cluster_id
 #   topic_id  = "customer.request"
 #   location  = var.region
 #   project   = var.project_id
@@ -159,7 +159,7 @@ variable "kafka_memory_gb_per_broker" {
 #
 # resource "google_managed_kafka_topic" "customer_reply" {
 #   count     = var.kafka_enabled ? 1 : 0
-#   cluster   = google_managed_kafka_cluster.mirador[0].cluster_id
+#   cluster   = google_managed_kafka_cluster.iris[0].cluster_id
 #   topic_id  = "customer.reply"
 #   location  = var.region
 #   project   = var.project_id
@@ -169,7 +169,7 @@ variable "kafka_memory_gb_per_broker" {
 #
 # resource "google_managed_kafka_topic" "customer_events" {
 #   count     = var.kafka_enabled ? 1 : 0
-#   cluster   = google_managed_kafka_cluster.mirador[0].cluster_id
+#   cluster   = google_managed_kafka_cluster.iris[0].cluster_id
 #   topic_id  = "customer.events"
 #   location  = var.region
 #   project   = var.project_id
@@ -179,7 +179,7 @@ variable "kafka_memory_gb_per_broker" {
 #
 # output "kafka_bootstrap_servers" {
 #   description = "Managed Kafka bootstrap endpoint — set as KAFKA_BOOTSTRAP_SERVERS in ConfigMap"
-#   value       = var.kafka_enabled ? google_managed_kafka_cluster.mirador[0].bootstrap_address : "kafka.infra.svc.cluster.local:9092"
+#   value       = var.kafka_enabled ? google_managed_kafka_cluster.iris[0].bootstrap_address : "kafka.infra.svc.cluster.local:9092"
 # }
 
 # =============================================================================

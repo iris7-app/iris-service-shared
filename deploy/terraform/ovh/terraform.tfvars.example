@@ -23,7 +23,7 @@ ovh_consumer_key       = "<from createToken/>"
 
 # Optional overrides (defaults in variables.tf):
 # region            = "GRA9"
-# cluster_name      = "mirador-prod"
+# cluster_name      = "iris7-prod"
 # k8s_version       = "1.31"
 # node_flavor       = "B2-7"
 # node_count_desired = 1
