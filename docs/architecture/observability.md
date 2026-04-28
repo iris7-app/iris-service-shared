@@ -66,7 +66,7 @@ Pyroscope) as a Grafana data source — no separate UIs to remember.
      - `kafka.produce customer.created` (event publish)
      - `resilience4j.retry` (if any retry occurred)
 5. Click any span → jump to its Loki logs (trace ID propagated in MDC via
-   `com.mirador.observability.RequestIdFilter`).
+   `com.iris.observability.RequestIdFilter`).
 
 ## Diagnostic scenarios
 
@@ -89,7 +89,7 @@ Expected:
 ```
 
 `db` is the standard Spring Boot check. `dbReachability` is a custom
-`HealthIndicator` (`com.mirador.observability.DatabaseReachabilityHealthIndicator`)
+`HealthIndicator` (`com.iris.observability.DatabaseReachabilityHealthIndicator`)
 that issues a real test query — not just a connection ping. Kubernetes
 readiness probes target this endpoint so the pod leaves the Service's
 endpoint list before users see errors.
@@ -130,7 +130,7 @@ After 5 s:
 ```
 
 The backend surfaces this as a Problem+JSON (RFC 9457) via
-`com.mirador.api.ApiExceptionHandler`, so the frontend can match the
+`com.iris.api.ApiExceptionHandler`, so the frontend can match the
 stable `type` URI instead of parsing English.
 
 ### Scenario 4 — Slow query detection
@@ -185,7 +185,7 @@ GET /customers/{id}/enrich
 | `customer.request` / `customer.reply` | request-reply | `ReplyingKafkaTemplate` | `CustomerEnrichHandler` |
 
 All three topics are explicitly declared in
-`com.mirador.messaging.KafkaConfig` — auto-create is disabled on the local
+`com.iris.messaging.KafkaConfig` — auto-create is disabled on the local
 Kafka container for safety.
 
 ---
@@ -221,7 +221,7 @@ done | sort | uniq -c
 # Expected: ~100× 200, ~10× 429
 ```
 
-The filter (`com.mirador.resilience.RateLimitingFilter`) validates the
+The filter (`com.iris.resilience.RateLimitingFilter`) validates the
 `X-Forwarded-For` IP format before using it, and caps the bucket map at
 50k entries — this prevents an attacker rotating spoofed IPs from
 exhausting memory.
@@ -263,11 +263,11 @@ data-source names need an adjustment.
 Since 2026-04-23 the OTel Collector also dual-exports every signal to
 **GitLab Observability** — GitLab's managed OTLP ingest backed by a
 Clickhouse cluster, free during beta. This means a portfolio reviewer
-can open https://gitlab.com/groups/mirador1/-/observability/tracing and
+can open https://gitlab.com/groups/iris-7/-/observability/tracing and
 see live traces / metrics / logs WITHOUT cloning the repo or booting Docker.
 
 ```
-mirador-service Spring Boot ──► OTel Collector
+iris-service Spring Boot ──► OTel Collector
                                   ├── otlphttp/{traces,metrics,logs}        ──► LGTM local (primary)
                                   └── otlphttp/{traces,metrics,logs}-gitlab ──► https://130289716.otel.gitlab-o11y.com:14318
 ```

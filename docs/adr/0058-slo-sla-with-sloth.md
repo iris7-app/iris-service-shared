@@ -3,15 +3,15 @@
 **Status** : Accepted
 **Date** : 2026-04-25
 **Sibling repos** :
-- `mirador-service-java/docs/slo/slo.yaml` (source of truth — Java)
-- `mirador-service-python/docs/slo/slo.yaml` (source of truth — Python)
-- `mirador-service-shared/deploy/kubernetes/observability-prom/mirador-{slo,py-slo}.yaml` (generated PrometheusRules)
-- `mirador-service-shared/infra/observability/grafana/dashboards-lgtm/slo-overview.json`
+- `iris-service-java/docs/slo/slo.yaml` (source of truth — Java)
+- `iris-service-python/docs/slo/slo.yaml` (source of truth — Python)
+- `iris-service-shared/deploy/kubernetes/observability-prom/iris-{slo,py-slo}.yaml` (generated PrometheusRules)
+- `iris-service-shared/infra/observability/grafana/dashboards-lgtm/slo-overview.json`
 
 ## Context
 
-Before this ADR : Mirador had decent baseline observability (5 recording
-rules + 8 alert rules in `mirador-alerts.yaml`) but NO formally-defined
+Before this ADR : Iris had decent baseline observability (5 recording
+rules + 8 alert rules in `iris-alerts.yaml`) but NO formally-defined
 SLOs/SLA. Symptoms :
 
 - "Is the service healthy ?" only answered via dashboards (subjective).
@@ -81,7 +81,7 @@ docs/slo/slo.yaml (sources of truth, edited by humans)
         │
         │  python3 docs/slo/wrap-as-prometheusrule.py
         ▼
-shared/deploy/kubernetes/observability-prom/mirador{-py}-slo.yaml
+shared/deploy/kubernetes/observability-prom/iris{-py}-slo.yaml
         │  (PrometheusRule CRD with `release: prometheus-stack` label)
         ▼
         kube-prometheus-stack operator picks up + Prometheus loads rules
@@ -134,7 +134,7 @@ illustrative of what a real SLA would impose.
 - **Burn rate** (timeseries, log scale) — current burn × normal pace,
   threshold lines at 1×, 6×, 14.4×.
 
-UID `mirador-slo-overview`, tagged `slo` `mirador` `sre`.
+UID `iris-slo-overview`, tagged `slo` `iris` `sre`.
 Auto-imported via the existing dashboards-lgtm provisioning.
 
 ## Consequences

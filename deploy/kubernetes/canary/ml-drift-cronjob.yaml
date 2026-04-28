@@ -21,12 +21,12 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: mirador-churn-drift
-  namespace: mirador
+  name: iris-churn-drift
+  namespace: iris
   labels:
-    app.kubernetes.io/name: mirador-churn-drift
+    app.kubernetes.io/name: iris-churn-drift
     app.kubernetes.io/component: ml
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
 spec:
   schedule: "0 3 * * *"
   timeZone: "UTC"
@@ -41,11 +41,11 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: mirador-churn-drift
+            app.kubernetes.io/name: iris-churn-drift
             app.kubernetes.io/component: ml
         spec:
           restartPolicy: Never
-          serviceAccountName: mirador-churn-drift
+          serviceAccountName: iris-churn-drift
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -53,7 +53,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: drift
-              image: registry.gitlab.com/mirador1/mirador-service-python:stable-py-v0.7.0
+              image: registry.gitlab.com/iris-7/iris-service-python:stable-py-v0.7.0
               # The Python service image already has all training deps
               # via the [ml] extra (torch + mlflow + sklearn + scipy + numpy).
               # Same image saves us a separate build pipeline.
@@ -61,17 +61,17 @@ spec:
               command: ["python3", "/app/infra/shared/bin/ml/compute_drift.py"]
               args:
                 - "--mlflow-uri=$(MLFLOW_TRACKING_URI)"
-                - "--db-url=$(MIRADOR_DB_URL)"
+                - "--db-url=$(IRIS_DB_URL)"
                 - "--lookback-days=30"
                 - "--ks-threshold=0.20"
                 - "--pushgateway=$(PROMETHEUS_PUSHGATEWAY_URL)"
               env:
                 - name: MLFLOW_TRACKING_URI
                   value: "http://mlflow.mlflow.svc.cluster.local:5000"
-                - name: MIRADOR_DB_URL
+                - name: IRIS_DB_URL
                   valueFrom:
                     secretKeyRef:
-                      name: mirador-secrets
+                      name: iris-secrets
                       key: DRIFT_DB_URL
                 - name: PROMETHEUS_PUSHGATEWAY_URL
                   value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
@@ -98,8 +98,8 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: mirador-churn-drift
-  namespace: mirador
+  name: iris-churn-drift
+  namespace: iris
   labels:
-    app.kubernetes.io/name: mirador-churn-drift
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/name: iris-churn-drift
+    app.kubernetes.io/part-of: iris

@@ -1,10 +1,10 @@
 # Changelog
 
-All notable changes to **mirador-service-shared** — infrastructure +
+All notable changes to **iris-service-shared** — infrastructure +
 observability + CI templates + cross-cutting docs for the
-[mirador1](https://gitlab.com/mirador1) family.
+[iris-7](https://gitlab.com/iris-7) family.
 
-This repo is submoduled into `mirador-service-java` and `mirador-service-python`.
+This repo is submoduled into `iris-service-java` and `iris-service-python`.
 Bumps in the consuming repos pin a specific SHA — see each consumer's
 `infra/shared` submodule for the in-flight version.
 
@@ -23,8 +23,8 @@ Bumps in the consuming repos pin a specific SHA — see each consumer's
 
 - **ADR-0058** : SLO/SLA-as-code via Sloth — design rationale + multi-window
   multi-burn-rate alerting pattern + Grafana dashboard structure.
-- **PrometheusRule CRDs** : `mirador-slo.yaml` (Java) +
-  `mirador-py-slo.yaml` (Python) — Sloth-generated, wrapped as kube-
+- **PrometheusRule CRDs** : `iris-slo.yaml` (Java) +
+  `iris-py-slo.yaml` (Python) — Sloth-generated, wrapped as kube-
   prometheus-stack PrometheusRule.
 - **SLO Overview Grafana dashboard** : 3 gauges + error budget timeseries +
   burn rate timeseries.
@@ -35,7 +35,7 @@ Bumps in the consuming repos pin a specific SHA — see each consumer's
 
 ## 2026-04-22..24 — Initial extraction
 
-- Extracted from `mirador-service-java` per [ADR-0001 (cross-cutting)](docs/adr/0001-shared-repo-via-submodule.md).
+- Extracted from `iris-service-java` per [ADR-0001 (cross-cutting)](docs/adr/0001-shared-repo-via-submodule.md).
 - Bin scripts : budget alerts (GCP + OVH), cluster lifecycle (OVH),
   release automation, stability checks, default-branch verification,
   runner healthcheck.

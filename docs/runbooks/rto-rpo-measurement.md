@@ -13,7 +13,7 @@ This runbook describes how to measure :
 - **RPO (Recovery Point Objective)** — count / volume of write
   transactions that would have been lost during the outage window.
 
-It targets the Mirador1 platform on a GKE Autopilot demo cluster
+It targets the Iris1 platform on a GKE Autopilot demo cluster
 (`bin/cluster/demo/up.sh`) but the same procedure adapts to any
 K8s cluster with a postgres StatefulSet.
 
@@ -49,7 +49,7 @@ and this runbook can be upgraded to use it.
 ### 1. Bring the cluster up
 
 ```bash
-cd ~/dev/mirador/mirador-service-shared
+cd ~/dev/iris/iris-service-shared
 bin/cluster/demo/up.sh
 ```
 
@@ -61,7 +61,7 @@ Rollouts + chaos-mesh control plane).
 ```bash
 kubectl apply -f deploy/kubernetes/postgres/
 
-kubectl create secret generic mirador-secrets -n infra \
+kubectl create secret generic iris-secrets -n infra \
   --from-literal=DB_PASSWORD=demo123 \
   --from-literal=DATASOURCE_PASSWORD=demo123 \
   --from-literal=POSTGRES_PASSWORD=demo123
@@ -69,7 +69,7 @@ kubectl create secret generic mirador-secrets -n infra \
 kubectl wait --for=condition=Ready pod postgresql-0 -n infra --timeout=120s
 ```
 
-Note : the StatefulSet expects `mirador-secrets` with at least the
+Note : the StatefulSet expects `iris-secrets` with at least the
 `DB_PASSWORD` key. In the canonical setup ESO populates it from
 GSM ; for a one-off RTO measurement a manual `kubectl create secret`
 is enough.
@@ -182,7 +182,7 @@ spec:
 
 | Metric | Value | Notes |
 |---|---|---|
-| **Cluster** | GKE Autopilot, `mirador-prod`, europe-west1 | Brought up via `bin/cluster/demo/up.sh` |
+| **Cluster** | GKE Autopilot, `@@KEEP_IRIS_PROD@@`, europe-west1 | Brought up via `bin/cluster/demo/up.sh` |
 | **Chaos action** | `kubectl delete pod postgresql-0 --force --grace-period=0` | StatefulSet pod-kill, PVC preserved |
 | **Probe** | `pg_isready` against the `postgresql` Service every 1 s | Ran in a separate pod inside the cluster |
 | **First fail** | 2026-04-28 06:03:16 (UTC) | Same second the kill landed |
@@ -191,7 +191,7 @@ spec:
 | **RTO** | **7 seconds** | First-fail → first-recovery |
 | **RPO** | Not measured directly | See "Limitations" below |
 
-For context : the Mirador SLA documents an RTO target of **30 seconds**
+For context : the Iris SLA documents an RTO target of **30 seconds**
 for postgres failures (see `docs/PRODUCTION-READINESS.md`). The
 measured 7 s comfortably beats the target.
 

@@ -5,8 +5,8 @@ Status: Accepted
 
 ## Context
 
-Mirador's IA axis (per shared ADR-0062 thematic mastery taxonomy
-in mirador-common) covers LLM **inference** (Spring AI + Ollama
+Iris's IA axis (per shared ADR-0062 thematic mastery taxonomy
+in iris-common) covers LLM **inference** (Spring AI + Ollama
 for customer-bio enrichment) but no **trained model**. Adding a
 trained predictor demonstrates a full ML lifecycle end-to-end :
 feature engineering, supervised training, evaluation, ONNX
@@ -45,7 +45,7 @@ churned = TRUE  WHEN customer.last_order_at < now() - interval '90 days'
 - `created_at < now - 120j` — exclude customers too recent to
   have had time to churn (avoid label leakage).
 
-The 3 windows are configurable in `mirador-service-python/
+The 3 windows are configurable in `iris-service-python/
 pyproject.toml` `[tool.churn]` block to allow tuning without
 code change :
 
@@ -70,11 +70,11 @@ no schema changes needed.
 | 5 | `order_frequency`             | float  | `count(orders) / customer_lifetime_days` |
 | 6 | `cart_diversity`              | float  | `count(distinct product_id) / count(order_lines)` over all orders |
 | 7 | `email_domain_class`          | int    | enum : 0=corporate-domain, 1=mainstream (gmail/outlook/yahoo), 2=disposable, 3=unknown |
-| 8 | `customer_lifetime_days`      | int    | `now() - customer.created_at` (replaces the originally proposed `support_tickets_count` since Mirador has no `support_ticket` table — flagged in 2026-04-27 session) |
+| 8 | `customer_lifetime_days`      | int    | `now() - customer.created_at` (replaces the originally proposed `support_tickets_count` since Iris has no `support_ticket` table — flagged in 2026-04-27 session) |
 
 **Why `customer_lifetime_days` over `support_tickets_count`** :
 the original proposal included support-ticket signals, but
-Mirador has no such schema. Adding one would be out of scope for
+Iris has no such schema. Adding one would be out of scope for
 a churn-prediction MR. `customer_lifetime_days` is a robust
 proxy : older customers have lower churn probability (survivor
 bias). Documented as a deliberate substitution rather than a
@@ -82,7 +82,7 @@ silent omission.
 
 ### Training data — synthetic for v1
 
-Mirador is greenfield with no historical "this customer churned"
+Iris is greenfield with no historical "this customer churned"
 labels. Two options were considered :
 
 1. **(a) Synthetic Faker** — generate 1000 customers + 10K
@@ -211,7 +211,7 @@ the export simple and lets us swap calibration without re-export).
 Phase A ships the **training side only** — Java + Python
 inference are Phase B + C in subsequent MRs.
 
-Files added to `mirador-service-python` :
+Files added to `iris-service-python` :
 
 - `bin/ml/train_churn.py` — main training script (read Postgres
   OR synthetic seed → features → PyTorch fit → evaluate → ONNX
@@ -239,34 +239,34 @@ Phase A produces : trained model + MLflow registry entry +
 
 ## Phase B — Java in-process inference (shipped 2026-04-27)
 
-The `mirador-service-java` backend now consumes the ONNX artefact
+The `iris-service-java` backend now consumes the ONNX artefact
 produced by Phase A and serves predictions in-process via
 ONNX Runtime — no sidecar, no network hop. Same lifecycle as
 ADR-0060.
 
-Files added to `mirador-service-java` :
+Files added to `iris-service-java` :
 
-- `src/main/java/com/mirador/ml/RiskBand.java` — enum
+- `src/main/java/com/iris/ml/RiskBand.java` — enum
   LOW/MEDIUM/HIGH with `classify(probability)` (thresholds 0.3 /
-  0.7, configurable per `mirador.churn.risk-thresholds`).
-- `src/main/java/com/mirador/ml/ChurnPredictionDto.java` —
+  0.7, configurable per `iris.churn.risk-thresholds`).
+- `src/main/java/com/iris/ml/ChurnPredictionDto.java` —
   Jackson-serialised record (`customerId`, `probability`,
   `riskBand`, `topFeatures`, `modelVersion`, `predictedAt`).
-- `src/main/java/com/mirador/ml/ChurnFeatureExtractor.java` —
+- `src/main/java/com/iris/ml/ChurnFeatureExtractor.java` —
   the same 8 features as Python's `feature_engineering.py` (see
   feature parity tests below).
-- `src/main/java/com/mirador/ml/ChurnPredictor.java` —
+- `src/main/java/com/iris/ml/ChurnPredictor.java` —
   Spring `@Service` with `@PostConstruct loadModel()` from
-  `mirador.churn.model-path` (default
+  `iris.churn.model-path` (default
   `/etc/models/churn_predictor.onnx` per ADR-0062). Sigmoid
   applied in code (model exports logits per ADR-0060 §"ONNX
   contract"). `isReady()` enables graceful degradation when the
   ConfigMap is missing.
-- `src/main/java/com/mirador/ml/ChurnController.java` —
+- `src/main/java/com/iris/ml/ChurnController.java` —
   `POST /customers/{id}/churn-prediction` with JWT or API-key
-  auth (mirrors the rest of Mirador's REST surface). 404 if
+  auth (mirrors the rest of Iris's REST surface). 404 if
   customer missing, 503 if model not loaded.
-- `src/main/java/com/mirador/ml/ChurnMcpToolService.java` —
+- `src/main/java/com/iris/ml/ChurnMcpToolService.java` —
   `@Tool predict_customer_churn(customer_id)` for LLM callers.
   Soft-error DTOs (`NotFoundDto`, `ServiceUnavailableDto`)
   instead of HTTP exceptions — the LLM can reason about retry /
@@ -278,7 +278,7 @@ Files added to `mirador-service-java` :
   provisioning).
 
 The MCP tool catalogue grows from 14 → 15 ;
-`com.mirador.mcp.McpConfig` registers the new
+`com.iris.mcp.McpConfig` registers the new
 `ChurnMcpToolService` and `McpServerITest` asserts the new tool
 name appears in the registry.
 
@@ -297,13 +297,13 @@ name appears in the registry.
 Phase B does NOT yet load a real `.onnx` artefact in CI — that
 happens in Phase F (ConfigMap promotion). Today, the Java
 service boots without the model, returns 503 on the prediction
-endpoint, and continues to serve all other Mirador endpoints
+endpoint, and continues to serve all other Iris endpoints
 unchanged. This is the deliberate "deploy-the-jar-before-the-
 model-is-ready" pattern from ADR-0062.
 
 ## Phase C — Python in-process inference (shipped 2026-04-27)
 
-The `mirador-service-python` backend now consumes the same ONNX
+The `iris-service-python` backend now consumes the same ONNX
 artefact as Phase B via the lightweight `onnxruntime` package
 (~30 MB, moved into the runtime `[project.dependencies]` so the
 default container is fully self-contained — the heavy training
@@ -312,33 +312,33 @@ Java — the "interchangeable backends" contract from common
 ADR-0008 extends to ML predictions : a UI client cannot tell
 which backend handled the call.
 
-Files added to `mirador-service-python` :
+Files added to `iris-service-python` :
 
-- `src/mirador_service/ml/risk_band.py` — `RiskBand` enum +
+- `src/iris_service/ml/risk_band.py` — `RiskBand` enum +
   `classify_risk(probability, low_threshold=0.3, high_threshold=0.7)`.
   Boundary semantics mirror Java's `RiskBand.java` exactly (`≤`
   inclusive on the low side, `≤` inclusive on the medium side,
   `>` exclusive on high).
-- `src/mirador_service/ml/dtos.py` — Pydantic `ChurnPrediction`,
+- `src/iris_service/ml/dtos.py` — Pydantic `ChurnPrediction`,
   `ChurnNotFound`, `ChurnServiceUnavailable`.
-- `src/mirador_service/ml/inference.py` — single-customer
+- `src/iris_service/ml/inference.py` — single-customer
   `extract_features()` (the lightweight runtime pendant to the
   pandas-vectorised `feature_engineering.build_features`) +
   `ChurnPredictor` (ONNX Runtime wrapper with graceful
   degradation). Robust to mixed-tz datetimes (SQLite returns
   naive, Postgres returns aware — both normalised to UTC inside
   the extractor).
-- `src/mirador_service/ml/router.py` —
+- `src/iris_service/ml/router.py` —
   `POST /customers/{id}/churn-prediction` (mirrors Java's
   `ChurnController` exactly).
-- `src/mirador_service/ml/predictor_singleton.py` — process-wide
+- `src/iris_service/ml/predictor_singleton.py` — process-wide
   singleton + `Depends`-compatible provider.
-  `MIRADOR_CHURN_MODEL_PATH` + `MIRADOR_CHURN_MODEL_VERSION` env
-  vars parallel Java's `mirador.churn.model-path` / `.model-version`.
-- `src/mirador_service/mcp/tools.py` — `predict_customer_churn`
+  `IRIS_CHURN_MODEL_PATH` + `IRIS_CHURN_MODEL_VERSION` env
+  vars parallel Java's `iris.churn.model-path` / `.model-version`.
+- `src/iris_service/mcp/tools.py` — `predict_customer_churn`
   registered as the 15th MCP tool. Soft-error DTOs match Java's
   `ChurnMcpToolService` shape exactly.
-- `src/mirador_service/app.py` — eager model load at lifespan
+- `src/iris_service/app.py` — eager model load at lifespan
   startup so the file-system check happens at boot, not on the
   first request.
 - `pyproject.toml` — `onnxruntime>=1.21,<2` + `numpy>=1.26,<3`
@@ -376,7 +376,7 @@ endpoint, and continues to serve all other endpoints unchanged.
 
 ## Phase D — UI page /insights/churn (shipped 2026-04-27)
 
-The `mirador-ui` repo ships a new page at `/insights/churn` with
+The `iris-ui` repo ships a new page at `/insights/churn` with
 3 widgets (search-by-id + Top-10 at-risk + drift placeholder)
 that hits `POST /customers/{id}/churn-prediction` on whichever
 backend is currently selected — Java (Phase B) or Python (Phase
@@ -384,7 +384,7 @@ C). The "interchangeable backends" contract from common ADR-0008
 extends to ML predictions ; a UI client cannot tell which backend
 handled the call.
 
-Files added to `mirador-ui` :
+Files added to `iris-ui` :
 
 - `src/app/features/insights/churn/churn-insights.component.ts`
   — standalone Angular component with the 3 widgets inline.
@@ -422,7 +422,7 @@ ConfigMap promotion script) was complete but the model itself
 was unobserved : nothing surfaced when the population shifted
 relative to the training distribution. Phase E closes that gap.
 
-Files added to `mirador-service-shared` :
+Files added to `iris-service-shared` :
 
 - `compose/dev-stack.yml` — new `mlflow` service under `profiles:
   ["ml"]`. SQLite backend + file-store artifacts under
@@ -443,16 +443,16 @@ Files added to `mirador-service-shared` :
   CronJob (03:00 UTC, `concurrencyPolicy: Forbid`,
   `backoffLimit: 1`) that runs `compute_drift.py` against the
   cluster's MLflow service. Uses the same
-  `mirador-service-python` image as the runtime (the `[ml]` extra
+  `iris-service-python` image as the runtime (the `[ml]` extra
   ships scipy + pandas + mlflow).
-- `deploy/kubernetes/observability-prom/mirador-drift-alerts.yaml`
+- `deploy/kubernetes/observability-prom/iris-drift-alerts.yaml`
   — PrometheusRule with 3 recording-rule blocks (max + p95 KS-stat,
   freshness) + Sloth-style SLO recording rules (1m / 5m / 1h / 6h
   / 1d / 3d windows) + 5 alerts (4 burn-rate per ADR-0058
   pattern + 1 freshness alert at 36 h gap). Wired into the
   observability-prom kustomization so kube-prom-stack picks it
   up automatically.
-- `infra/observability/grafana/dashboards-lgtm/mirador-churn-drift.json`
+- `infra/observability/grafana/dashboards-lgtm/iris-churn-drift.json`
   — Grafana dashboard with 5 panels : drift today (stat), 30-day
   budget remaining (gauge), drift series freshness (stat),
   per-feature drift over time (timeseries with the 0.20
@@ -484,7 +484,7 @@ an MLflow "Production"-tagged ONNX file and lands it as a
 read-only Kubernetes ConfigMap mounted at
 `/etc/models/churn_predictor.onnx` on both backends.
 
-Files added to `mirador-service-shared` :
+Files added to `iris-service-shared` :
 
 - `bin/ml/promote_to_configmap.sh` — the promotion script
   (260 LOC, full pre-flight + AUC gate + dry-run + `--yes`

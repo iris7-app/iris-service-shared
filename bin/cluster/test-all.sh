@@ -6,7 +6,7 @@
 # `bin/cluster/ovh/up.sh` (OVH) brings a cluster up, you used to run
 # 8-10 kubectl commands by hand to confirm everything is healthy:
 # nodes Ready, system pods Running, DNS resolving, ingress alive,
-# mirador deployment Available, /actuator/health UP, observability
+# iris deployment Available, /actuator/health UP, observability
 # stack scraping. This script bundles all of that into one pass with
 # a clear pass/fail table — same idiom as bin/dev/healthcheck-all.sh
 # (local services). Per user direction 2026-04-23: "groupe les tests
@@ -15,7 +15,7 @@
 #
 # What this checks (all against the CURRENT kubectl context):
 #   1. Cluster level   — nodes Ready, system pods Running, DNS, ingress
-#   2. App level       — mirador deployment, pods, service endpoints
+#   2. App level       — iris deployment, pods, service endpoints
 #   3. App liveness    — /actuator/health UP via port-forward
 #   4. Observability   — prometheus targets up, grafana reachable
 #                        (only checked if the stack is installed)
@@ -62,7 +62,7 @@ fi
 # Detect target flavour from context name (best-effort).
 case "$CONTEXT" in
   gke_*)        FLAVOUR="GKE"  ;;
-  ovh_*|kubernetes-admin@mirador-prod) FLAVOUR="OVH" ;;
+  ovh_*|kubernetes-admin@@@KEEP_IRIS_PROD@@) FLAVOUR="OVH" ;;
   kind-*)       FLAVOUR="kind" ;;
   *)            FLAVOUR="?"    ;;
 esac
@@ -77,10 +77,10 @@ CHECKS=(
   "CoreDNS deployment Available|kubectl get deploy -n kube-system coredns -o jsonpath='{.status.conditions[?(@.type==\"Available\")].status}'|True|1"
   "Default storage class set|kubectl get sc -o jsonpath='{.items[?(@.metadata.annotations.storageclass\\.kubernetes\\.io/is-default-class==\"true\")].metadata.name}'|.|0"
   # ── 2. App level ──
-  "Namespace mirador exists|kubectl get ns mirador -o name|namespace/mirador|0"
-  "mirador-svc deployment Available|kubectl get deploy -n mirador mirador-svc -o jsonpath='{.status.conditions[?(@.type==\"Available\")].status}' 2>/dev/null|True|0"
-  "mirador-svc service has endpoints|kubectl get endpoints -n mirador mirador-svc -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null|\\.|0"
-  "Postgres StatefulSet Ready|kubectl get sts -n mirador postgres -o jsonpath='{.status.readyReplicas}' 2>/dev/null|1|0"
+  "Namespace iris exists|kubectl get ns iris -o name|namespace/iris|0"
+  "iris-svc deployment Available|kubectl get deploy -n iris iris-svc -o jsonpath='{.status.conditions[?(@.type==\"Available\")].status}' 2>/dev/null|True|0"
+  "iris-svc service has endpoints|kubectl get endpoints -n iris iris-svc -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null|\\.|0"
+  "Postgres StatefulSet Ready|kubectl get sts -n iris postgres -o jsonpath='{.status.readyReplicas}' 2>/dev/null|1|0"
   # ── 3. Observability (if installed) ──
   "Prometheus deployment Available|kubectl get deploy -n monitoring prometheus-server -o jsonpath='{.status.conditions[?(@.type==\"Available\")].status}' 2>/dev/null|True|0"
   "Grafana deployment Available|kubectl get deploy -n monitoring grafana -o jsonpath='{.status.conditions[?(@.type==\"Available\")].status}' 2>/dev/null|True|0"
@@ -136,10 +136,10 @@ LIVENESS_STATUS="skipped"
 if [ "$QUICK" = "0" ]; then
   if [ "$MODE" = "human" ]; then
     echo
-    echo -e "  ${DIM}↻ Port-forwarding mirador-svc:8080 for /actuator/health probe…${NC}"
+    echo -e "  ${DIM}↻ Port-forwarding iris-svc:8080 for /actuator/health probe…${NC}"
   fi
   # Background port-forward, kill on exit.
-  (kubectl port-forward -n mirador svc/mirador-svc 18080:8080 >/dev/null 2>&1) &
+  (kubectl port-forward -n iris svc/iris-svc 18080:8080 >/dev/null 2>&1) &
   PF_PID=$!
   trap 'kill "$PF_PID" 2>/dev/null || true' EXIT INT TERM
   sleep 3

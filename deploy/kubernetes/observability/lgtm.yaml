@@ -125,19 +125,19 @@ spec:
             # subPath mounts let us inject each file individually into the
             # otel-lgtm image's own config dir without wiping its sample.yaml.
             - name: grafana-dashboards
-              mountPath: /otel-lgtm/grafana/conf/provisioning/dashboards/mirador.yaml
-              subPath: mirador.yaml
+              mountPath: /otel-lgtm/grafana/conf/provisioning/dashboards/iris.yaml
+              subPath: iris.yaml
               readOnly: true
             - name: grafana-dashboards
-              mountPath: /var/lib/grafana/dashboards/mirador/golden-signals.json
+              mountPath: /var/lib/grafana/dashboards/iris/golden-signals.json
               subPath: golden-signals.json
               readOnly: true
             - name: grafana-dashboards
-              mountPath: /var/lib/grafana/dashboards/mirador/canary.json
+              mountPath: /var/lib/grafana/dashboards/iris/canary.json
               subPath: canary.json
               readOnly: true
             - name: grafana-dashboards
-              mountPath: /var/lib/grafana/dashboards/mirador/service-graph.json
+              mountPath: /var/lib/grafana/dashboards/iris/service-graph.json
               subPath: service-graph.json
               readOnly: true
             # OTel Collector config override — adds kubeletstats +

@@ -11,7 +11,7 @@
 #   3. cd deploy/terraform/ovh && terraform init -migrate-state
 #
 # What this script does :
-#   1. Creates an OVH Object Storage container `mirador-tfstate` in GRA
+#   1. Creates an OVH Object Storage container `iris-tfstate` in GRA
 #   2. Enables versioning on the container (preserves state diffs)
 #   3. Generates S3 credentials (access key + secret) for the container
 #   4. Writes credentials + endpoint URL to .env.local
@@ -30,7 +30,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 ENV_LOCAL="$REPO_ROOT/.env.local"
-CONTAINER_NAME="${OVH_TF_BACKEND_BUCKET:-mirador-tfstate}"
+CONTAINER_NAME="${OVH_TF_BACKEND_BUCKET:-iris-tfstate}"
 REGION="${OVH_REGION:-gra}"  # lowercase for S3 endpoint (vs GRA9 for compute)
 
 echo "▶️  ovh init-backend (container=$CONTAINER_NAME region=$REGION)"

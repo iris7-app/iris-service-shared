@@ -1,8 +1,8 @@
 {
-  "title": "Logs — Mirador (service_name=mirador)",
-  "uid": "mirador-logs",
+  "title": "Logs — Iris (service_name=iris)",
+  "uid": "iris-logs",
   "schemaVersion": 39,
-  "tags": ["mirador", "logs", "auto"],
+  "tags": ["iris", "logs", "auto"],
   "time": { "from": "now-15m", "to": "now" },
   "refresh": "10s",
   "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"] },
@@ -15,15 +15,15 @@
     {
       "id": 1,
       "type": "logs",
-      "title": "Mirador backend logs",
-      "description": "Live tail of the Spring Boot logs emitted via the OpenTelemetry Logback appender, filtered by the OTel resource attribute `service.name` (exported as the `service_name` Loki label). Edit the query at the top of the panel to broaden or narrow the filter — the default is `{service_name=\"mirador\"}` which matches only backend logs.",
+      "title": "Iris backend logs",
+      "description": "Live tail of the Spring Boot logs emitted via the OpenTelemetry Logback appender, filtered by the OTel resource attribute `service.name` (exported as the `service_name` Loki label). Edit the query at the top of the panel to broaden or narrow the filter — the default is `{service_name=\"iris\"}` which matches only backend logs.",
       "gridPos": { "x": 0, "y": 0, "w": 24, "h": 28 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "{service_name=\"mirador\"} |= ``",
+          "expr": "{service_name=\"iris\"} |= ``",
           "queryType": "range",
           "legendFormat": ""
         }

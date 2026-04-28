@@ -7,7 +7,7 @@
 # `ovh-cost-audit.sh` and emit a desktop notification (osascript) if
 # month-to-date spend exceeds the threshold.
 #
-# Wired via `bin/launchd/com.mirador.ovh-budget.plist` :
+# Wired via `bin/launchd/com.iris.ovh-budget.plist` :
 #   - runs daily at 09:00 local
 #   - desktop notification on threshold breach
 #   - exit 0 always (cron must not retry on legitimate spend)
@@ -40,13 +40,13 @@ for var in OVH_APPLICATION_KEY OVH_APPLICATION_SECRET OVH_CONSUMER_KEY OVH_PROJE
   if [ -z "${!var:-}" ]; then
     # Soft fail : cron context, log + exit 0 (don't retry-storm on
     # missing creds — user must source the env file manually).
-    osascript -e "display notification \"OVH \\\$$var not set — alert disabled. See deploy/terraform/ovh/README.md\" with title \"Mirador OVH budget\" sound name \"Submarine\"" 2>/dev/null || true
+    osascript -e "display notification \"OVH \\\$$var not set — alert disabled. See deploy/terraform/ovh/README.md\" with title \"Iris OVH budget\" sound name \"Submarine\"" 2>/dev/null || true
     exit 0
   fi
 done
 
 if [ ! -x "$REPO_ROOT/bin/budget/ovh-cost-audit.sh" ]; then
-  osascript -e "display notification \"bin/budget/ovh-cost-audit.sh missing — alert disabled\" with title \"Mirador OVH budget\" sound name \"Submarine\"" 2>/dev/null || true
+  osascript -e "display notification \"bin/budget/ovh-cost-audit.sh missing — alert disabled\" with title \"Iris OVH budget\" sound name \"Submarine\"" 2>/dev/null || true
   exit 0
 fi
 
@@ -59,9 +59,9 @@ mtd_eur=$(echo "$audit_output" | grep -oE "Month-to-date.*€[0-9.]+" | grep -oE
 breached=$(awk -v m="$mtd_eur" -v t="$THRESHOLD_EUR" 'BEGIN { print (m > t) ? 1 : 0 }')
 
 if [ "$breached" = "1" ]; then
-  msg="Mirador OVH spend €${mtd_eur} > €${THRESHOLD_EUR} threshold (MTD). Run bin/cluster/ovh/down.sh if unintended."
+  msg="Iris OVH spend €${mtd_eur} > €${THRESHOLD_EUR} threshold (MTD). Run bin/cluster/ovh/down.sh if unintended."
   echo "🔴 ALERT $(date +%H:%M:%S) — $msg"
-  osascript -e "display notification \"$msg\" with title \"Mirador OVH budget — ALERT\" sound name \"Glass\"" 2>/dev/null || true
+  osascript -e "display notification \"$msg\" with title \"Iris OVH budget — ALERT\" sound name \"Glass\"" 2>/dev/null || true
 elif [ "$QUIET" = "0" ]; then
   echo "✅ $(date +%H:%M:%S) — OVH spend €${mtd_eur} within €${THRESHOLD_EUR} threshold (MTD)."
 fi

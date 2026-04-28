@@ -1,4 +1,4 @@
-# TASKS — mirador-service-shared
+# TASKS — iris-service-shared
 
 Open work only. Per `~/.claude/CLAUDE.md` rules : shared infra
 (K8s / Terraform / dashboards / observability / cross-cutting ADRs)
@@ -11,19 +11,19 @@ follow-ups.
 
 ## 🌀 IRIS REBRAND (in flight 2026-04-28)
 
-Coordinated rename Mirador → Iris. See full context + phases in
-[Java TASKS.md](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/TASKS.md#-iris-rebrand-in-flight-2026-04-28).
+Coordinated rename Iris → Iris. See full context + phases in
+[Java TASKS.md](https://gitlab.com/iris-7/iris-service-java/-/blob/main/TASKS.md#-iris-rebrand-in-flight-2026-04-28).
 
 Shared-side scope :
 
-- **Code-level** : 91 files, 722 refs to "mirador". Affects :
-  - K8s manifests : `mirador-prod` cluster name, `mirador-secrets`,
-    `mirador-config`, postgres/kafka/redis labels, namespace labels
-  - Helm charts : `mirador-app` chart name → `iris-app`
-  - Terraform : `mirador-prod` GKE cluster (rename = recreate)
+- **Code-level** : 91 files, 722 refs to "iris". Affects :
+  - K8s manifests : `@@KEEP_IRIS_PROD@@` cluster name, `iris-secrets`,
+    `iris-config`, postgres/kafka/redis labels, namespace labels
+  - Helm charts : `iris-app` chart name → `iris-app`
+  - Terraform : `@@KEEP_IRIS_PROD@@` GKE cluster (rename = recreate)
   - Grafana dashboard JSON : titles + panel descriptions
   - OTel collector configs : resource attributes
-  - ADR cross-references : ~30 ADRs reference "Mirador"
+  - ADR cross-references : ~30 ADRs reference "Iris"
 - **Phase 4 (code/manifest rename)** : 🔴 dedicated session.
 
 ### ✅ Decisions verrouillées
@@ -36,7 +36,7 @@ locked = `02o-iris-final.svg`. Tagline = `7 FACETS`.
 ## 📊 RPO measurement (paused 2026-04-28)
 
 RTO measured 2026-04-28 : **7 seconds** for postgres pod-kill on
-GKE Autopilot ([docs/runbooks/rto-rpo-measurement.md](docs/runbooks/rto-rpo-measurement.md), [!8](https://gitlab.com/mirador1/mirador-service-shared/-/merge_requests/8) merged).
+GKE Autopilot ([docs/runbooks/rto-rpo-measurement.md](docs/runbooks/rto-rpo-measurement.md), [!8](https://gitlab.com/iris-7/iris-service-shared/-/merge_requests/8) merged).
 
 RPO measurement was started 2026-04-28 ~07:46 with a second cluster
 bring-up, but **paused before the chaos run** (cluster up → cluster
@@ -46,7 +46,7 @@ down to save costs while we debate the Iris rebrand). To complete :
 2. Deploy postgres + java-app (the existing Argo CD path is broken —
    `deploy/argocd/application.yaml` doesn't exist, see up.sh log
    from 2026-04-28 ; manual `kubectl apply` works on the postgres
-   manifest with a manual `mirador-secrets`)
+   manifest with a manual `iris-secrets`)
 3. Deploy a writer pod that posts /customers at 50 req/s during
    the chaos window
 4. `kubectl delete pod postgresql-0 --force --grace-period=0`

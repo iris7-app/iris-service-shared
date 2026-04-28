@@ -1,7 +1,7 @@
 # SLO Review Cadence
 
-> Cross-cutting SRE practice for the Mirador project family. Same cadence
-> applies to both `mirador-service-java` and `mirador-service-python` ;
+> Cross-cutting SRE practice for the Iris project family. Same cadence
+> applies to both `iris-service-java` and `iris-service-python` ;
 > reviews can be combined since both services share the same SLO targets
 > (per [ADR-0058](../adr/0058-slo-sla-with-sloth.md)).
 
@@ -23,9 +23,9 @@ actually steering decisions.
 **Who** : on-call rotation lead + at least one team member.
 
 **What to bring** :
-1. Compliance % per SLO from the [SLO Overview dashboard](https://grafana.local/d/mirador-slo-overview/).
+1. Compliance % per SLO from the [SLO Overview dashboard](https://grafana.local/d/iris-slo-overview/).
 2. Top 3 endpoints contributing to budget burn (from the
-   [SLO Breakdown by Endpoint dashboard](https://grafana.local/d/mirador-slo-breakdown-by-endpoint/)).
+   [SLO Breakdown by Endpoint dashboard](https://grafana.local/d/iris-slo-breakdown-by-endpoint/)).
 3. List of incidents during the month with their SLO budget impact (in minutes).
 4. Capacity changes (replicas added/removed, hardware swaps).
 5. Deploy frequency + deploy failure correlation.
@@ -95,7 +95,7 @@ actually steering decisions.
 ## See also
 
 - [ADR-0058 SLO/SLA with Sloth](../adr/0058-slo-sla-with-sloth.md) — design rationale
-- [Java SLO definitions](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/slo/slo.yaml)
-- [Python SLO definitions](https://gitlab.com/mirador1/mirador-service-python/-/blob/main/docs/slo/slo.yaml)
+- [Java SLO definitions](https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/slo/slo.yaml)
+- [Python SLO definitions](https://gitlab.com/iris-7/iris-service-python/-/blob/main/docs/slo/slo.yaml)
 - [Google SRE Workbook ch. 4 — Service Level Objectives](https://sre.google/workbook/implementing-slos/)
 - [Google SRE Workbook ch. 5 — Alerting on SLOs](https://sre.google/workbook/alerting-on-slos/)

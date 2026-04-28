@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # moved 2026-04-22 from bin/cluster/demo-down.sh — per ~/.claude/CLAUDE.md subdirectory hygiene
 # =============================================================================
-# bin/cluster/demo/down.sh — tear down the ephemeral mirador demo cluster.
+# bin/cluster/demo/down.sh — tear down the ephemeral iris demo cluster.
 #
 # Runs `terraform destroy` on the GKE Autopilot cluster. After this, GCP
 # billing drops to ~€0/month — only the GCS state bucket (cents) and the
@@ -17,7 +17,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"  # robust against location changes 
 TF_DIR="$REPO_ROOT/deploy/terraform/gcp"
 PROJECT_ID="${TF_VAR_project_id:-project-8d6ea68c-33ac-412b-8aa}"
 REGION="${TF_VAR_region:-europe-west1}"
-CLUSTER_NAME="${TF_VAR_cluster_name:-mirador-prod}"
+CLUSTER_NAME="${TF_VAR_cluster_name:-@@KEEP_IRIS_PROD@@}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "▶️  demo-down starting (project=$PROJECT_ID region=$REGION cluster=$CLUSTER_NAME)"
@@ -25,13 +25,13 @@ echo "▶️  demo-down starting (project=$PROJECT_ID region=$REGION cluster=$CL
 cd "$TF_DIR"
 terraform init \
   -backend-config="bucket=$TF_STATE_BUCKET" \
-  -backend-config="prefix=mirador/gcp" \
+  -backend-config="prefix=iris/gcp" \
   -input=false -reconfigure >/dev/null
 
 TF_VAR_project_id="$PROJECT_ID" \
 TF_VAR_region="$REGION" \
 TF_VAR_cluster_name="$CLUSTER_NAME" \
-TF_VAR_app_host="${TF_VAR_app_host:-mirador1.duckdns.org}" \
+TF_VAR_app_host="${TF_VAR_app_host:-iris7.duckdns.org}" \
   terraform destroy -input=false -auto-approve
 
 # --- PVC cleanup (the silent-cost trap) ---
@@ -41,7 +41,7 @@ TF_VAR_app_host="${TF_VAR_app_host:-mirador1.duckdns.org}" \
 # leaves the PD disks orphaned on the GCE side — billed at €0.048/GB/month
 # per Balanced disk until a human notices and purges.
 #
-# A single demo cycle of Mirador creates ~10 PVCs (Postgres, Kafka,
+# A single demo cycle of Iris creates ~10 PVCs (Postgres, Kafka,
 # Keycloak, LGTM, Pyroscope, Unleash DB, each with their own PVC).
 # Over a month of iterative demos this accumulates silently into
 # tens of GB of zombie disks.
@@ -71,7 +71,7 @@ cat <<EOF
 Surviving resources (intentional, ~€0/month):
   - GCS bucket $TF_STATE_BUCKET (Terraform state, cents/month)
   - Artifact Registry images (cents/month)
-  - GSM secrets: mirador-{db-password,jwt-secret,api-key,gitlab-api-token,keycloak-admin-password}
+  - GSM secrets: iris-{db-password,jwt-secret,api-key,gitlab-api-token,keycloak-admin-password}
   - GCP SA external-secrets-operator@ (no cost)
 
 Bring everything back with: bin/cluster/demo/up.sh

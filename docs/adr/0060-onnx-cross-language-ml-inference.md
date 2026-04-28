@@ -5,8 +5,8 @@ Status: Accepted
 
 ## Context
 
-Mirador has two interchangeable backends — `mirador-service-java`
-(Spring Boot 4 / Java 25) and `mirador-service-python` (FastAPI /
+Iris has two interchangeable backends — `iris-service-java`
+(Spring Boot 4 / Java 25) and `iris-service-python` (FastAPI /
 Python 3.13) — that share an identical OpenAPI contract and an
 identical 14-tool MCP catalogue. The polyrepo design lets the UI
 plug into either backend transparently (same port 8080 by default,
@@ -54,7 +54,7 @@ backends), native Python ML (no ONNX conversion friction).
 - Adds a container (1 SPOF, 1 cost line, 1 monitoring surface).
 - Network round-trip per prediction (~5-20 ms vs ~0.1 ms in-process).
 - **Violates the "produces vs accesses" rule from
-  [shared ADR-0062](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/adr/0062-mcp-server-tool-exposure-per-method.md)** :
+  [shared ADR-0062](https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/adr/0062-mcp-server-tool-exposure-per-method.md)** :
   an LLM agent calling `predict_customer_churn` would hop LLM →
   MCP server → ML serving sidecar — three tiers when the model is
   small enough to run in-process.
@@ -103,7 +103,7 @@ case.
   (the backend serves what it produces in-process).
 - **Determinism** cross-language : the `predict_customer_churn`
   MCP tool returns the same probability whether routed to
-  mirador-java or mirador-python. Smoke-testable identically to
+  iris-java or iris-python. Smoke-testable identically to
   how we already validate `list_recent_orders` parity.
 - **Mature ecosystem** : ONNX is 8 years old, Microsoft-
   maintained, supports sklearn / PyTorch / TensorFlow / Keras /
@@ -137,12 +137,12 @@ case.
 ### Neutral
 - Picks the boring-but-proven option over the fashionable one.
   Some recent stacks favour `WebAssembly + ONNX` (deploy
-  inference at the edge) but Mirador's threat model is
+  inference at the edge) but Iris's threat model is
   server-side only.
 
 ## Operational reference
 
-- Java side dependency declared in `mirador-service-java/pom.xml` :
+- Java side dependency declared in `iris-service-java/pom.xml` :
   ```xml
   <dependency>
       <groupId>com.microsoft.onnxruntime</groupId>
@@ -150,13 +150,13 @@ case.
       <version>${onnxruntime.version}</version>
   </dependency>
   ```
-- Python side in `mirador-service-python/pyproject.toml` :
+- Python side in `iris-service-python/pyproject.toml` :
   ```toml
   [project.dependencies]
   onnxruntime = ">=1.21,<2"
   ```
 - Training side adds `torch>=2.5`, `onnx>=1.17`, `mlflow>=2.16`
-  to `mirador-service-python/pyproject.toml` `[project.optional-
+  to `iris-service-python/pyproject.toml` `[project.optional-
   dependencies.ml]`.
 
 The artefact format `.onnx` is binary and does not diff cleanly

@@ -120,7 +120,7 @@ Every successful transition writes one row via the existing audit hook :
 
 - **Java** : `auditEventPort.recordEvent(actor, action, detail, ip)` —
   same port as login / token-refresh events, exposed by
-  `com.mirador.observability.port.AuditEventPort` (already wired across
+  `com.iris.observability.port.AuditEventPort` (already wired across
   the Java codebase).
 - **Python** : the equivalent audit-event hook (today implemented
   inline in `customer/audit_router.py` ; once the `audit_event` table
@@ -167,7 +167,7 @@ choice now avoids retro-engineering when money flow lands.
 
 ### UI affordance (consumer side, for context)
 
-The UI ([`mirador-ui`](https://gitlab.com/mirador1/mirador-ui)) surfaces
+The UI ([`iris-ui`](https://gitlab.com/iris-7/iris-ui)) surfaces
 the transition on the order-detail screen (`features/commerce/orders/`) :
 
 1. Each line row carries the existing read-only status badge.
@@ -242,7 +242,7 @@ lines per backend. No reason to skip.
 - **Auditable refund trail** — every transition is recorded with actor,
   action, reason, timestamp. Customer-service queries ("who refunded
   order #X line #Y ?") become one SQL query.
-- **UI affordance unblocked** — `mirador-ui` can ship the refund button
+- **UI affordance unblocked** — `iris-ui` can ship the refund button
   + dialog without further backend ambiguity. The existing read-only
   badge + the new PATCH endpoint complete the round-trip.
 - **State machine enforced server-side** — the existing
@@ -359,9 +359,9 @@ async refundLine(line: OrderLine): Promise<void> {
 ## References
 
 - [shared ADR-0059 — Customer/Order/Product/OrderLine data model](0059-customer-order-product-data-model.md) — the per-line cycle invariant promoted to first-class status here
-- [`mirador-ui` TASKS.md](https://gitlab.com/mirador1/mirador-ui/-/blob/main/TASKS.md) — "Per-line refund state machine" entry that motivated this ADR
-- [`mirador-service-java` follow-up MR](https://gitlab.com/mirador1/mirador-service-java/-/merge_requests?scope=all&state=all&search=order-line-refund) — Java implementation
-- [`mirador-service-python` follow-up MR](https://gitlab.com/mirador1/mirador-service-python/-/merge_requests?scope=all&state=all&search=order-line-refund) — Python implementation
-- [`mirador-ui` follow-up MR](https://gitlab.com/mirador1/mirador-ui/-/merge_requests?scope=all&state=all&search=refund-line-action) — UI consumer switch
+- [`iris-ui` TASKS.md](https://gitlab.com/iris-7/iris-ui/-/blob/main/TASKS.md) — "Per-line refund state machine" entry that motivated this ADR
+- [`iris-service-java` follow-up MR](https://gitlab.com/iris-7/iris-service-java/-/merge_requests?scope=all&state=all&search=order-line-refund) — Java implementation
+- [`iris-service-python` follow-up MR](https://gitlab.com/iris-7/iris-service-python/-/merge_requests?scope=all&state=all&search=order-line-refund) — Python implementation
+- [`iris-ui` follow-up MR](https://gitlab.com/iris-7/iris-ui/-/merge_requests?scope=all&state=all&search=refund-line-action) — UI consumer switch
 - RFC 5789 — HTTP PATCH method (the verb choice rationale)
 - 2026-04-27 session — UI side surfaced the gap as a "to consider" item ; this ADR unblocks the spec without committing the implementation in the same MR.

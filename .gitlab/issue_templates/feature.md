@@ -1,5 +1,5 @@
 <!-- Before proposing a feature: read docs/adr/0021-cost-deferred-industrial-patterns.md.
-     Mirador accepts features that advance a demo scenario; it declines features that add
+     Iris accepts features that advance a demo scenario; it declines features that add
      dependencies without a problem they solve. -->
 
 ## Problem

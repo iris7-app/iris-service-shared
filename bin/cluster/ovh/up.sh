@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# bin/cluster/ovh/up.sh — bring up the Mirador K8s cluster on OVH Cloud.
+# bin/cluster/ovh/up.sh — bring up the Iris K8s cluster on OVH Cloud.
 #
 # Mirrors bin/cluster/demo/up.sh (GCP equivalent) but targets OVH's
 # Managed Kubernetes (`ovh_cloud_project_kube`). Per ADR-0053, OVH is a
@@ -10,7 +10,7 @@
 # What this script does:
 #   1. Pre-flight: check OVH credentials in env (4 vars) + tools on PATH.
 #   2. terraform / tofu apply  (creates cluster + private network)
-#   3. Write kubeconfig to ~/.kube/ovh-mirador.yaml
+#   3. Write kubeconfig to ~/.kube/ovh-iris.yaml
 #   4. Wait for the node to become Ready
 #   5. Print follow-up commands (KUBECONFIG export + first kubectl call)
 #
@@ -30,7 +30,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 TF_DIR="$REPO_ROOT/deploy/terraform/ovh"
-KUBECONFIG_OUT="${KUBECONFIG_OUT:-$HOME/.kube/ovh-mirador.yaml}"
+KUBECONFIG_OUT="${KUBECONFIG_OUT:-$HOME/.kube/ovh-iris.yaml}"
 
 # Tool selector — Terraform by default, OpenTofu opt-in via env var.
 # Per ADR-0053: same HCL works for both, no syntax divergence in our module.
@@ -63,7 +63,7 @@ export TF_VAR_ovh_project_id="$OVH_PROJECT_ID"
 
 # Optional overrides (defaults in variables.tf).
 export TF_VAR_region="${OVH_REGION:-GRA9}"
-export TF_VAR_cluster_name="${OVH_CLUSTER_NAME:-mirador-prod}"
+export TF_VAR_cluster_name="${OVH_CLUSTER_NAME:-@@KEEP_IRIS_PROD@@}"
 
 cd "$TF_DIR"
 

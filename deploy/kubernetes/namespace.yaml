@@ -2,7 +2,7 @@
 # Kubernetes Namespace definitions
 #
 # Three namespaces follow the principle of least privilege and resource isolation:
-#   app           — the mirador application (backend + frontend)
+#   app           — the iris application (backend + frontend)
 #   infra         — stateful infrastructure: PostgreSQL, Kafka, Redis, Keycloak
 #   observability — monitoring stack: Grafana, Prometheus, Loki, Tempo
 #
@@ -33,7 +33,7 @@ kind: Namespace
 metadata:
   name: app
   labels:
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
     # Pod Security Standards — enforce the strictest profile.
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/enforce-version: latest
@@ -45,7 +45,7 @@ kind: Namespace
 metadata:
   name: infra
   labels:
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
     # Baseline rather than restricted — some stateful services (Kafka,
     # Keycloak init containers) trip on restricted's no-root rule.
     pod-security.kubernetes.io/enforce: baseline
@@ -58,7 +58,7 @@ kind: Namespace
 metadata:
   name: observability
   labels:
-    app.kubernetes.io/part-of: mirador
+    app.kubernetes.io/part-of: iris
     pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/warn: baseline

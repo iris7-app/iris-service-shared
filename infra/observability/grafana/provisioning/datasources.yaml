@@ -8,7 +8,7 @@ apiVersion: 1
 # Loki — label selectors are indexed and exact-match; line filters are not.
 #
 # Flow: Tempo span → click "Logs for this span" → Loki query
-#   {service_name="mirador", trace_id="<traceId>"}
+#   {service_name="iris", trace_id="<traceId>"}
 #
 # The Prometheus datasource points to Mimir (bundled in otel-lgtm, port 9090
 # internally) — replaces the former standalone Prometheus container.
@@ -34,7 +34,7 @@ datasources:
     jsonData:
       tracesToLogsV2:
         # trace_id is a Loki stream label (indexed) — use label selector, not line filter.
-        # ${__tags} expands to e.g. {service_name="mirador"} based on the tags mapping below.
+        # ${__tags} expands to e.g. {service_name="iris"} based on the tags mapping below.
         customQuery: true
         datasourceUid: loki
         query: '{service_name="${__tags.service_name}", trace_id="${__trace.traceId}"}'
@@ -64,7 +64,7 @@ datasources:
     # so the Logs view opens with it selected by default (instead of Prometheus).
     isDefault: false
     jsonData:
-      # Pre-fills the Explore Logs query box with a `service_name=mirador`
+      # Pre-fills the Explore Logs query box with a `service_name=iris`
       # selector so the default Logs view only shows backend logs. Users can
       # still edit or remove the filter in Explore — this is a starting
       # point, not a hard restriction (Loki queries are still client-side
@@ -73,7 +73,7 @@ datasources:
       # Requires Grafana 10.4+ (otel-lgtm 0.22.1 ships Grafana 11.x, so this
       # is supported). The field is recognised by the Loki data-source
       # plugin; older versions silently ignore it.
-      defaultQuery: '{service_name="mirador"} |= ``'
+      defaultQuery: '{service_name="iris"} |= ``'
       derivedFields:
         # trace_id label on a Loki log entry → jump to the matching Tempo trace.
         - name: trace_id

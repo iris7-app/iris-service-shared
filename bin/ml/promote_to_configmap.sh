@@ -48,9 +48,9 @@ BOLD='\033[1m'; DIM='\033[2m'; NC='\033[0m'
 MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-http://localhost:5000}"
 MLFLOW_MODEL_NAME="${MLFLOW_MODEL_NAME:-customer-churn-mlp}"
 MLFLOW_STAGE="${MLFLOW_STAGE:-Production}"
-KUBE_NAMESPACE="${KUBE_NAMESPACE:-mirador}"
-CONFIGMAP_NAME="${CONFIGMAP_NAME:-mirador-churn-model}"
-DEPLOYMENTS_TO_RESTART="${DEPLOYMENTS_TO_RESTART:-mirador-service-java mirador-service-python}"
+KUBE_NAMESPACE="${KUBE_NAMESPACE:-iris}"
+CONFIGMAP_NAME="${CONFIGMAP_NAME:-iris-churn-model}"
+DEPLOYMENTS_TO_RESTART="${DEPLOYMENTS_TO_RESTART:-iris-service-java iris-service-python}"
 AUC_GATE="${AUC_GATE:-0.60}"
 
 # ── Args ──────────────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ else
 fi
 
 # ── Download artifact ─────────────────────────────────────────────────────────
-TMPDIR="$(mktemp -d -t mirador-churn-XXXX)"
+TMPDIR="$(mktemp -d -t iris-churn-XXXX)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
 note "downloading ONNX artifact to $TMPDIR…"
@@ -160,12 +160,12 @@ kubectl create configmap "$CONFIGMAP_NAME" \
 # without hitting MLflow at debug time.
 ANNOTATIONS_LINE='  annotations:'
 ANNOTATIONS=(
-  "    mirador.io/mlflow-model: ${MLFLOW_MODEL_NAME}"
-  "    mirador.io/mlflow-version: \"${MODEL_VERSION}\""
-  "    mirador.io/mlflow-stage: ${MLFLOW_STAGE}"
-  "    mirador.io/mlflow-run-id: \"${RUN_ID:-unknown}\""
-  "    mirador.io/auc-holdout: \"${AUC:-unknown}\""
-  "    mirador.io/promoted-at: \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
+  "    iris.io/mlflow-model: ${MLFLOW_MODEL_NAME}"
+  "    iris.io/mlflow-version: \"${MODEL_VERSION}\""
+  "    iris.io/mlflow-stage: ${MLFLOW_STAGE}"
+  "    iris.io/mlflow-run-id: \"${RUN_ID:-unknown}\""
+  "    iris.io/auc-holdout: \"${AUC:-unknown}\""
+  "    iris.io/promoted-at: \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
 )
 # Inject annotations under metadata: — kubectl create doesn't add them.
 {
@@ -222,5 +222,5 @@ done
 echo
 ok "${BOLD}Promotion complete.${NC} Model ${MLFLOW_MODEL_NAME}/${MODEL_VERSION} is live."
 note "verify with :"
-echo "  kubectl -n $KUBE_NAMESPACE exec deployment/mirador-service-java -- ls -la /etc/models/"
+echo "  kubectl -n $KUBE_NAMESPACE exec deployment/iris-service-java -- ls -la /etc/models/"
 echo "  curl -X POST http://<svc>/customers/1/churn-prediction"

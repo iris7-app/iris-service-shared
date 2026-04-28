@@ -4,7 +4,7 @@
 # bin/cluster/demo/up-fast.sh — minimal cluster bring-up for "verify that a change works".
 #
 # Skips Kyverno, Argo Rollouts and Chaos Mesh operators. Useful for:
-#   - CI pre-merge smoke tests that just need mirador + Postgres + ESO
+#   - CI pre-merge smoke tests that just need iris + Postgres + ESO
 #   - checking a pom.xml bump didn't break the Spring Boot boot path
 #   - iterating on a K8s manifest under Argo CD
 #
@@ -29,7 +29,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"  # robust against location changes 
 TF_DIR="$REPO_ROOT/deploy/terraform/gcp"
 PROJECT_ID="${TF_VAR_project_id:-project-8d6ea68c-33ac-412b-8aa}"
 REGION="${TF_VAR_region:-europe-west1}"
-CLUSTER_NAME="${TF_VAR_cluster_name:-mirador-prod}"
+CLUSTER_NAME="${TF_VAR_cluster_name:-@@KEEP_IRIS_PROD@@}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "⚡ demo-up-fast (project=$PROJECT_ID cluster=$CLUSTER_NAME)"
@@ -42,13 +42,13 @@ gcloud services enable container.googleapis.com secretmanager.googleapis.com \
 cd "$TF_DIR"
 terraform init \
   -backend-config="bucket=$TF_STATE_BUCKET" \
-  -backend-config="prefix=mirador/gcp" \
+  -backend-config="prefix=iris/gcp" \
   -input=false -reconfigure >/dev/null
 
 TF_VAR_project_id="$PROJECT_ID" \
 TF_VAR_region="$REGION" \
 TF_VAR_cluster_name="$CLUSTER_NAME" \
-TF_VAR_app_host="${TF_VAR_app_host:-mirador1.duckdns.org}" \
+TF_VAR_app_host="${TF_VAR_app_host:-iris7.duckdns.org}" \
   terraform apply -input=false -auto-approve
 
 gcloud container clusters get-credentials "$CLUSTER_NAME" --region="$REGION" --project="$PROJECT_ID"
@@ -68,8 +68,8 @@ if ! gcloud iam service-accounts describe "$SA_EMAIL" --project="$PROJECT_ID" >/
   gcloud iam service-accounts create external-secrets-operator \
     --project="$PROJECT_ID" --display-name="External Secrets Operator"
 fi
-for secret in mirador-db-password mirador-jwt-secret mirador-api-key \
-              mirador-gitlab-api-token mirador-keycloak-admin-password; do
+for secret in iris-db-password iris-jwt-secret iris-api-key \
+              iris-gitlab-api-token iris-keycloak-admin-password; do
   gcloud secrets add-iam-policy-binding "$secret" \
     --project="$PROJECT_ID" \
     --member="serviceAccount:$SA_EMAIL" \
@@ -108,7 +108,7 @@ kubectl set resources statefulset argocd-application-controller -n argocd \
 #    about missing ClusterIssuer like earlier iterations.
 kubectl apply -f "$REPO_ROOT/deploy/argocd/application.yaml"
 
-echo "⏳  waiting for mirador-app pods..."
+echo "⏳  waiting for iris-app pods..."
 # Give Argo CD ~2 min to pull + start.
 for _ in $(seq 1 24); do
   ready=$(kubectl get pods -n app --no-headers 2>/dev/null | awk '$2=="1/1"' | wc -l | tr -d ' ')

@@ -1,10 +1,10 @@
-# Code owners for mirador1/* (GitLab format)
+# Code owners for iris-7/* (GitLab format)
 #
 # Used by Renovate (assigneesFromCodeOwners + reviewersFromCodeOwners) to
 # auto-assign dependency-update MRs. Used by GitLab branch protection
 # review rules. See https://docs.gitlab.com/user/project/codeowners/.
 #
 # As a portfolio-demo solo project, all paths default to a single owner.
-# In a real team, this file would map paths to teams (e.g. `src/main/java/com/mirador/auth/ @auth-team`).
+# In a real team, this file would map paths to teams (e.g. `src/main/java/com/iris/auth/ @auth-team`).
 
 * @benoit.besson

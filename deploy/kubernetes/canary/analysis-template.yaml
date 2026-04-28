@@ -16,7 +16,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
-  name: mirador-error-rate
+  name: iris-error-rate
   namespace: app
 spec:
   args:

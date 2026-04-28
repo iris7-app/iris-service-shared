@@ -1,7 +1,7 @@
 # External Secrets Operator scaffolding
 
 These manifests project Google Secret Manager entries into Kubernetes Secrets
-named `mirador-secrets` (in both `app` and `infra`) and `keycloak-secrets`
+named `iris-secrets` (in both `app` and `infra`) and `keycloak-secrets`
 (in `infra`). The scaffolding is **not** imported by `../kustomization.yaml` —
 activating it is an explicit, deliberate cutover.
 
@@ -22,10 +22,10 @@ The benefits appear when:
 Pre-flight (all already done on the current GCP project — see session log from
 2026-04-18):
 
-1. GSM secrets created: `mirador-db-password`, `mirador-jwt-secret`,
-   `mirador-api-key`, `mirador-gitlab-api-token`, `mirador-otel-auth`,
-   `mirador-keycloak-admin`, `mirador-keycloak-admin-password`,
-   `mirador-keycloak-kc-db-password`.
+1. GSM secrets created: `iris-db-password`, `iris-jwt-secret`,
+   `iris-api-key`, `iris-gitlab-api-token`, `iris-otel-auth`,
+   `iris-keycloak-admin`, `iris-keycloak-admin-password`,
+   `iris-keycloak-kc-db-password`.
 2. GCP service account `external-secrets-operator@<project>.iam.gserviceaccount.com`
    has `roles/secretmanager.secretAccessor` on each of the secrets above.
 3. Workload Identity binding on the GCP SA → K8s SA
@@ -45,20 +45,20 @@ Cut over:
 3. Verify the projected secrets:
    ```
    kubectl get externalsecret -A
-   kubectl get secret mirador-secrets -n app -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
+   kubectl get secret iris-secrets -n app -o jsonpath='{.data.DB_PASSWORD}' | base64 -d
    ```
-4. Delete the `kubectl create secret generic mirador-secrets` + `keycloak-secrets`
+4. Delete the `kubectl create secret generic iris-secrets` + `keycloak-secrets`
    steps from `.gitlab-ci.yml` (the `deploy:gke` job). ESO becomes the sole owner.
 5. Rotate a secret to verify the flow end-to-end:
    ```
-   echo -n "new-value" | gcloud secrets versions add mirador-db-password --data-file=-
-   kubectl annotate externalsecret mirador-secrets -n app \
+   echo -n "new-value" | gcloud secrets versions add iris-db-password --data-file=-
+   kubectl annotate externalsecret iris-secrets -n app \
      force-sync=$(date +%s) --overwrite
    ```
 
 ## Rollback
 
 Revert the commit that added `external-secrets` to `base/kustomization.yaml`.
-The K8s `Secret` named `mirador-secrets` stays where it is because ESO's
+The K8s `Secret` named `iris-secrets` stays where it is because ESO's
 `creationPolicy: Owner` keeps the last-projected version. You can then resume
 the CI-creates-secret pattern with no data loss.

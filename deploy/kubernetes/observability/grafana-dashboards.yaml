@@ -9,7 +9,7 @@
 # We deliver both via a single ConfigMap mounted at
 # /etc/grafana/provisioning/dashboards/ inside the otel-lgtm image. The image
 # only overwrites its own home.json — custom dashboards added here sit
-# alongside, visible in the sidebar as "Mirador / …".
+# alongside, visible in the sidebar as "Iris / …".
 #
 # To edit a dashboard: tweak the JSON here, redeploy (Argo CD sync). Grafana
 # scans every 30 s and picks up the change without a restart.
@@ -24,12 +24,12 @@ metadata:
     app.kubernetes.io/component: grafana-dashboards
 data:
   # ── Provider config — tells Grafana where to look ─────────────────────
-  mirador.yaml: |
+  iris.yaml: |
     apiVersion: 1
     providers:
-      - name: mirador
+      - name: iris
         orgId: 1
-        folder: Mirador
+        folder: Iris
         type: file
         disableDeletion: false
         updateIntervalSeconds: 30
@@ -38,16 +38,16 @@ data:
           # Where the dashboard JSONs live — see the volumeMount subPath
           # entries in lgtm.yaml. Separate from the provider YAML's dir
           # so Grafana does not try to parse the YAML as a dashboard.
-          path: /var/lib/grafana/dashboards/mirador
+          path: /var/lib/grafana/dashboards/iris
 
   # ── Dashboard #1 — Golden signals (RED method) ───────────────────────
   # Request rate + error rate + p95 latency + JVM heap — the minimum set
   # that tells you "is the service healthy right now?" at a glance.
   golden-signals.json: |
     {
-      "title": "Mirador — Golden Signals",
-      "uid": "mirador-golden",
-      "tags": ["mirador", "red-method"],
+      "title": "Iris — Golden Signals",
+      "uid": "iris-golden",
+      "tags": ["iris", "red-method"],
       "timezone": "browser",
       "schemaVersion": 39,
       "version": 1,
@@ -62,7 +62,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by (uri) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\"}[1m]))",
+              "expr": "sum by (uri) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\"}[1m]))",
               "legendFormat": "{{uri}}"
             }
           ],
@@ -76,7 +76,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\",status=~\"5..\"}[1m])) / sum(rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\"}[1m]))",
+              "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\",status=~\"5..\"}[1m])) / sum(rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\"}[1m]))",
               "legendFormat": "5xx rate"
             }
           ],
@@ -102,7 +102,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{namespace=\"app\",service=~\"mirador.*\"}[1m]))) * 1000",
+              "expr": "histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{namespace=\"app\",service=~\"iris.*\"}[1m]))) * 1000",
               "legendFormat": "{{uri}}"
             }
           ],
@@ -116,7 +116,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "jvm_memory_used_bytes{namespace=\"app\",service=~\"mirador.*\",area=\"heap\"} / jvm_memory_max_bytes{namespace=\"app\",service=~\"mirador.*\",area=\"heap\"}",
+              "expr": "jvm_memory_used_bytes{namespace=\"app\",service=~\"iris.*\",area=\"heap\"} / jvm_memory_max_bytes{namespace=\"app\",service=~\"iris.*\",area=\"heap\"}",
               "legendFormat": "{{pod}}"
             }
           ],
@@ -137,9 +137,9 @@ data:
   # you can see what Argo Rollouts sees.
   canary.json: |
     {
-      "title": "Mirador — Canary rollout",
-      "uid": "mirador-canary",
-      "tags": ["mirador", "argo-rollouts"],
+      "title": "Iris — Canary rollout",
+      "uid": "iris-canary",
+      "tags": ["iris", "argo-rollouts"],
       "timezone": "browser",
       "schemaVersion": 39,
       "version": 1,
@@ -154,7 +154,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\"}[1m]))",
+              "expr": "sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\"}[1m]))",
               "legendFormat": "{{rollout_role}}"
             }
           ],
@@ -168,7 +168,7 @@ data:
           "targets": [
             {
               "refId": "A",
-              "expr": "sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\",status=~\"5..\"}[1m])) / sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"mirador.*\"}[1m]))",
+              "expr": "sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\",status=~\"5..\"}[1m])) / sum by (rollout_role) (rate(http_server_requests_seconds_count{namespace=\"app\",service=~\"iris.*\"}[1m]))",
               "legendFormat": "{{rollout_role}}"
             }
           ],
@@ -203,9 +203,9 @@ data:
   # golden-signals.json which shows the big aggregates.
   service-graph.json: |
     {
-      "title": "Mirador — Service Graph",
-      "uid": "mirador-service-graph",
-      "tags": ["mirador", "tempo", "service-map"],
+      "title": "Iris — Service Graph",
+      "uid": "iris-service-graph",
+      "tags": ["iris", "tempo", "service-map"],
       "timezone": "browser",
       "schemaVersion": 39,
       "version": 1,

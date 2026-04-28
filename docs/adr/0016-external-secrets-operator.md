@@ -5,7 +5,7 @@
 
 ## Context
 
-Secrets used by the backend (`mirador-secrets`, `keycloak-secrets`) are
+Secrets used by the backend (`iris-secrets`, `keycloak-secrets`) are
 currently created by a `kubectl create secret generic` step inside the
 `deploy:gke` CI job. This works but has three problems:
 
@@ -36,7 +36,7 @@ Concretely:
   (ADR-0014).
 - One `SecretStore` (namespace-scoped) per namespace that consumes
   secrets: `app`, `infra`. Both point at the same GSM project via WIF.
-- One `ExternalSecret` CR per logical secret (`mirador-secrets`,
+- One `ExternalSecret` CR per logical secret (`iris-secrets`,
   `keycloak-secrets`), mapping GSM entries → K8s Secret keys. Refresh
   interval: 1 h.
 - The scaffolding is ready under
@@ -97,10 +97,10 @@ what the demo showcases.
 Concrete steps applied:
 
 1. `gcloud services enable secretmanager.googleapis.com iamcredentials.googleapis.com`
-2. Created 8 GSM entries: `mirador-db-password`, `mirador-jwt-secret`,
-   `mirador-api-key`, `mirador-gitlab-api-token`, `mirador-otel-auth`,
-   `mirador-keycloak-admin`, `mirador-keycloak-admin-password`,
-   `mirador-keycloak-kc-db-password`.
+2. Created 8 GSM entries: `iris-db-password`, `iris-jwt-secret`,
+   `iris-api-key`, `iris-gitlab-api-token`, `iris-otel-auth`,
+   `iris-keycloak-admin`, `iris-keycloak-admin-password`,
+   `iris-keycloak-kc-db-password`.
 3. Created GCP service account
    `external-secrets-operator@<project>.iam.gserviceaccount.com` with
    `roles/secretmanager.secretAccessor` on each entry.
@@ -112,23 +112,23 @@ Concrete steps applied:
    `base/kustomization.yaml`.
 6. Argo CD reconciled the CRDs within ~3 min; ESO projected the GSM
    entries into K8s Secrets with the same names as the hand-created ones
-   (`mirador-secrets` in `app` + `infra`, `keycloak-secrets` in `infra`).
+   (`iris-secrets` in `app` + `infra`, `keycloak-secrets` in `infra`).
 7. Verified via
-   `kubectl get secret mirador-secrets -n app -o jsonpath='{.data.DB_PASSWORD}' | base64 -d`.
+   `kubectl get secret iris-secrets -n app -o jsonpath='{.data.DB_PASSWORD}' | base64 -d`.
 
 Cost: **€0** — consolidated to 5 GSM entries (under the 6-free-tier
 quota). Redundancies dropped:
 
-- `mirador-otel-auth` — not used (OTLP disabled in the demo).
-- `mirador-keycloak-admin` — username "admin" is not a secret; kept as
+- `iris-otel-auth` — not used (OTLP disabled in the demo).
+- `iris-keycloak-admin` — username "admin" is not a secret; kept as
   a hard-coded env on the Keycloak Deployment.
-- `mirador-keycloak-kc-db-password` — same value as
-  `mirador-db-password`; the Keycloak ExternalSecret now references
+- `iris-keycloak-kc-db-password` — same value as
+  `iris-db-password`; the Keycloak ExternalSecret now references
   the shared GSM entry directly.
 
-Remaining 5 GSM entries: `mirador-db-password`, `mirador-jwt-secret`,
-`mirador-api-key`, `mirador-gitlab-api-token`,
-`mirador-keycloak-admin-password`.
+Remaining 5 GSM entries: `iris-db-password`, `iris-jwt-secret`,
+`iris-api-key`, `iris-gitlab-api-token`,
+`iris-keycloak-admin-password`.
 
 Access operations: ~3600/month (5 secrets × 24 refreshes/day × 30),
 well under the 10k free quota.
@@ -137,13 +137,13 @@ well under the 10k free quota.
 
 1. Create the GSM entries:
    ```
-   gcloud secrets create mirador-db-password --replication-policy=automatic
-   echo -n "$NEW_PASSWORD" | gcloud secrets versions add mirador-db-password --data-file=-
+   gcloud secrets create iris-db-password --replication-policy=automatic
+   echo -n "$NEW_PASSWORD" | gcloud secrets versions add iris-db-password --data-file=-
    ```
 2. Grant the cluster's WIF-backed service account `roles/secretmanager.secretAccessor`.
 3. Move `deploy/external-secrets/*` into `deploy/kubernetes/base/external-secrets/`.
 4. Add it to `base/kustomization.yaml` so Argo CD picks it up.
-5. Delete the `kubectl create secret generic mirador-secrets` step
+5. Delete the `kubectl create secret generic iris-secrets` step
    from `.gitlab-ci.yml`.
 
 ## References

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# bin/cluster/ovh/down.sh — destroy the Mirador K8s cluster on OVH Cloud.
+# bin/cluster/ovh/down.sh — destroy the Iris K8s cluster on OVH Cloud.
 #
 # Mirrors bin/cluster/demo/down.sh (GCP) — runs `terraform destroy` so
 # OVH billing drops to €0/month for compute. The Public Cloud project +
@@ -13,7 +13,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 TF_DIR="$REPO_ROOT/deploy/terraform/ovh"
-KUBECONFIG_OUT="${KUBECONFIG_OUT:-$HOME/.kube/ovh-mirador.yaml}"
+KUBECONFIG_OUT="${KUBECONFIG_OUT:-$HOME/.kube/ovh-iris.yaml}"
 TF_BIN="${TF_BIN:-terraform}"
 
 echo "▶️  ovh-down starting (tool=$TF_BIN)"
@@ -36,7 +36,7 @@ export TF_VAR_ovh_application_secret="$OVH_APPLICATION_SECRET"
 export TF_VAR_ovh_consumer_key="$OVH_CONSUMER_KEY"
 export TF_VAR_ovh_project_id="$OVH_PROJECT_ID"
 export TF_VAR_region="${OVH_REGION:-GRA9}"
-export TF_VAR_cluster_name="${OVH_CLUSTER_NAME:-mirador-prod}"
+export TF_VAR_cluster_name="${OVH_CLUSTER_NAME:-@@KEEP_IRIS_PROD@@}"
 
 cd "$TF_DIR"
 

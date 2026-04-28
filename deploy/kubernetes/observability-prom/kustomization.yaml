@@ -1,5 +1,5 @@
 # =============================================================================
-# base/observability-prom/ — Prometheus alert + recording rules for Mirador.
+# base/observability-prom/ — Prometheus alert + recording rules for Iris.
 #
 # Referenced only by overlays that deploy kube-prometheus-stack (and thus
 # register the PrometheusRule CRD): local-prom, gke-prom. The plain `local/`
@@ -14,5 +14,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - mirador-alerts.yaml
-  - mirador-drift-alerts.yaml
+  - iris-alerts.yaml
+  - iris-drift-alerts.yaml

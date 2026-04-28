@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # moved 2026-04-22 from bin/cluster/demo-up.sh — per ~/.claude/CLAUDE.md subdirectory hygiene
 # =============================================================================
-# bin/cluster/demo/up.sh — bring up the ephemeral mirador demo cluster on GKE.
+# bin/cluster/demo/up.sh — bring up the ephemeral iris demo cluster on GKE.
 #
 # 1. terraform apply      (create GKE Autopilot cluster)
 # 2. get-credentials      (wire kubectl)
@@ -20,7 +20,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"  # robust against location changes 
 TF_DIR="$REPO_ROOT/deploy/terraform/gcp"
 PROJECT_ID="${TF_VAR_project_id:-project-8d6ea68c-33ac-412b-8aa}"
 REGION="${TF_VAR_region:-europe-west1}"
-CLUSTER_NAME="${TF_VAR_cluster_name:-mirador-prod}"
+CLUSTER_NAME="${TF_VAR_cluster_name:-@@KEEP_IRIS_PROD@@}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "▶️  demo-up starting (project=$PROJECT_ID region=$REGION cluster=$CLUSTER_NAME)"
@@ -36,13 +36,13 @@ gcloud services enable \
 cd "$TF_DIR"
 terraform init \
   -backend-config="bucket=$TF_STATE_BUCKET" \
-  -backend-config="prefix=mirador/gcp" \
+  -backend-config="prefix=iris/gcp" \
   -input=false -reconfigure >/dev/null
 
 TF_VAR_project_id="$PROJECT_ID" \
 TF_VAR_region="$REGION" \
 TF_VAR_cluster_name="$CLUSTER_NAME" \
-TF_VAR_app_host="${TF_VAR_app_host:-mirador1.duckdns.org}" \
+TF_VAR_app_host="${TF_VAR_app_host:-iris7.duckdns.org}" \
   terraform apply -input=false -auto-approve
 
 # 2. Wire kubectl to the new cluster.
@@ -84,8 +84,8 @@ if ! gcloud iam service-accounts describe "$SA_EMAIL" --project="$PROJECT_ID" >/
 fi
 
 # Bind each GSM secret individually (re-running is idempotent).
-for secret in mirador-db-password mirador-jwt-secret mirador-api-key \
-              mirador-gitlab-api-token mirador-keycloak-admin-password; do
+for secret in iris-db-password iris-jwt-secret iris-api-key \
+              iris-gitlab-api-token iris-keycloak-admin-password; do
   gcloud secrets add-iam-policy-binding "$secret" \
     --project="$PROJECT_ID" \
     --member="serviceAccount:$SA_EMAIL" \
@@ -181,10 +181,10 @@ if [ "${WITH_PROMETHEUS:-true}" = "true" ]; then
 fi
 
 # 8. Optional GitLab Agent for Kubernetes — registers cluster under
-#    https://gitlab.com/mirador1/mirador-service/-/clusters.
-#    Requires /tmp/gitlab-agent-mirador.token (created via API on first run).
+#    https://gitlab.com/iris-7/iris-service/-/clusters.
+#    Requires /tmp/gitlab-agent-iris.token (created via API on first run).
 #    Skip with WITH_GITLAB_AGENT=false.
-if [ "${WITH_GITLAB_AGENT:-true}" = "true" ] && [ -f /tmp/gitlab-agent-mirador.token ]; then
+if [ "${WITH_GITLAB_AGENT:-true}" = "true" ] && [ -f /tmp/gitlab-agent-iris.token ]; then
   "$REPO_ROOT/bin/cluster/demo/install-gitlab-agent.sh"
 fi
 

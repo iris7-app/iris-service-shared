@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# bin/budget/budget.sh — one-stop wrapper for the Mirador GCP budget alert.
+# bin/budget/budget.sh — one-stop wrapper for the Iris GCP budget alert.
 #
 # The budget is described in detail in docs/ops/cost-control.md. This
 # script wraps the `gcloud billing budgets` CLI so the common operations
@@ -25,7 +25,7 @@ set -u
 BILLING_ACCOUNT="${BILLING_ACCOUNT:-019384-EA1A6A-9D635C}"
 BUDGET_ID="${BUDGET_ID:-cb08b055-d30e-4830-a18a-94bed797f116}"
 PROJECT="${GCP_PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
-DISPLAY_NAME="Mirador €10 alert"
+DISPLAY_NAME="Iris €10 alert"
 DEFAULT_AMOUNT="10EUR"
 
 cmd="${1:-status}"
@@ -47,7 +47,7 @@ case "$cmd" in
 
 status)
   require_budget
-  echo "💰  Mirador budget — $(date +%H:%M:%S)"
+  echo "💰  Iris budget — $(date +%H:%M:%S)"
   echo "    billing-account: $BILLING_ACCOUNT"
   echo "    budget-id:       $BUDGET_ID"
   name=$(gcloud billing budgets describe "$BUDGET_ID" --billing-account="$BILLING_ACCOUNT" --format="value(displayName)" 2>/dev/null)

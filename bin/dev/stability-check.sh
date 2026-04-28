@@ -61,9 +61,9 @@ set -euo pipefail
 
 # ── Locate the two repos (this script lives in svc) ─────────────────────────
 SVC_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-UI_DIR="$(cd "$SVC_DIR/../../js/mirador-ui" 2>/dev/null && pwd || echo "")"
+UI_DIR="$(cd "$SVC_DIR/../../js/iris-ui" 2>/dev/null && pwd || echo "")"
 if [[ -z "$UI_DIR" || ! -d "$UI_DIR" ]]; then
-  echo "✗ UI repo not found at expected sibling path ($SVC_DIR/../../js/mirador-ui)"
+  echo "✗ UI repo not found at expected sibling path ($SVC_DIR/../../js/iris-ui)"
   echo "  Update SVC_DIR/UI_DIR resolution at the top of this script."
   exit 2
 fi

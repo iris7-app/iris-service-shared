@@ -14,7 +14,7 @@ cluster" in ≤ 10 minutes, without manual YAML editing.
 |---|---|---|
 | MLflow reachable | `curl -s "$MLFLOW_TRACKING_URI/api/2.0/mlflow/registered-models/list" \| jq .registered_models[].name` | The script reads `MLFLOW_TRACKING_URI` ; without it, it can't pull the artefact. |
 | `kubectl` context = target cluster | `kubectl config current-context` | The script does NOT prompt for context confirmation past pre-flight — set it deliberately first. |
-| Namespace exists | `kubectl get ns "$KUBE_NAMESPACE"` | `KUBE_NAMESPACE` defaults to `mirador`. Override with `KUBE_NAMESPACE=app` if your cluster differs. |
+| Namespace exists | `kubectl get ns "$KUBE_NAMESPACE"` | `KUBE_NAMESPACE` defaults to `iris`. Override with `KUBE_NAMESPACE=app` if your cluster differs. |
 | `mlflow` CLI installed | `mlflow --version` | Used to call `models get-latest-versions` + `artifacts download` + `runs describe`. |
 | `kubectl` + `jq` installed | `kubectl version --client && jq --version` | Both required by the script. |
 
@@ -28,11 +28,11 @@ bin/ml/promote_to_configmap.sh --dry-run
 bin/ml/promote_to_configmap.sh
 
 # 3. Confirm the model is loaded in both backends.
-kubectl -n mirador exec deployment/mirador-service-java   -- ls -la /etc/models/
-kubectl -n mirador exec deployment/mirador-service-python -- ls -la /etc/models/
+kubectl -n iris exec deployment/iris-service-java   -- ls -la /etc/models/
+kubectl -n iris exec deployment/iris-service-python -- ls -la /etc/models/
 
 # 4. Smoke test through the REST endpoint.
-kubectl -n mirador port-forward deployment/mirador-service-java 8080:8080 &
+kubectl -n iris port-forward deployment/iris-service-java 8080:8080 &
 TOKEN=$(curl -s -X POST localhost:8080/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"admin"}' | jq -r .accessToken)
@@ -103,7 +103,7 @@ The script prints `auc_holdout = 0.7X` when the gate runs. If you
 need to verify post-hoc :
 
 ```bash
-kubectl get configmap mirador-churn-model -n mirador -o yaml \
+kubectl get configmap iris-churn-model -n iris -o yaml \
   | grep -E "mlflow-version|auc-holdout|promoted-at"
 ```
 
@@ -129,7 +129,7 @@ stage the model behind a code change.
 ## Argo CD GitOps integration
 
 For full GitOps : commit the generated ConfigMap YAML into a
-dedicated repo (e.g. `mirador-gitops`) and let Argo CD sync it.
+dedicated repo (e.g. `iris-gitops`) and let Argo CD sync it.
 The script supports this via :
 
 ```bash
@@ -150,11 +150,11 @@ once Argo Rollouts + ConfigMap watchers are exercised together).
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | `mlflow CLI required` | `mlflow` not on `$PATH` | `pip install mlflow` |
-| `no '<stage>' version found` | Nothing in the registry tagged `Production` | Promote one in MLflow UI : Models → mirador-churn-mlp → version → Promote |
+| `no '<stage>' version found` | Nothing in the registry tagged `Production` | Promote one in MLflow UI : Models → iris-churn-mlp → version → Promote |
 | `AUC gate FAILED` | Model regressed | Investigate the run in MLflow UI (compare metrics with the previous green run). Don't bypass — fix the root cause. |
 | `kubectl apply failed` | RBAC or no current context | `kubectl auth can-i create configmaps -n $KUBE_NAMESPACE` |
-| `rollout did not complete in 5 min` | Pod failing to come up (e.g. AAOM, image pull) | `kubectl describe pod -n $KUBE_NAMESPACE -l app.kubernetes.io/name=mirador` ; `kubectl logs -n $KUBE_NAMESPACE -l app.kubernetes.io/name=mirador --tail=100` |
-| Pods boot but `/customers/1/churn-prediction` still returns 503 | ConfigMap not mounted in the right path / wrong namespace | `kubectl exec deployment/mirador-service-java -n $KUBE_NAMESPACE -- ls -la /etc/models/` ; if empty, check the volume in the Rollout spec matches `mirador-churn-model` |
+| `rollout did not complete in 5 min` | Pod failing to come up (e.g. AAOM, image pull) | `kubectl describe pod -n $KUBE_NAMESPACE -l app.kubernetes.io/name=iris` ; `kubectl logs -n $KUBE_NAMESPACE -l app.kubernetes.io/name=iris --tail=100` |
+| Pods boot but `/customers/1/churn-prediction` still returns 503 | ConfigMap not mounted in the right path / wrong namespace | `kubectl exec deployment/iris-service-java -n $KUBE_NAMESPACE -- ls -la /etc/models/` ; if empty, check the volume in the Rollout spec matches `iris-churn-model` |
 
 ## Related
 
@@ -162,5 +162,5 @@ once Argo Rollouts + ConfigMap watchers are exercised together).
 - [`deploy/kubernetes/canary/rollout.yaml`](../../deploy/kubernetes/canary/rollout.yaml) — the `churn-model` volume + mount.
 - [shared ADR-0061](../adr/0061-customer-churn-prediction.md) — the architectural decision.
 - [shared ADR-0062](../adr/0062-mlflow-registry-configmap-promotion.md) — why ConfigMap (vs PVC, vs sidecar, vs OCI artifact).
-- [Java feature doc](https://gitlab.com/mirador1/mirador-service-java/-/blob/main/docs/ml/churn-prediction.md).
-- [Python feature doc](https://gitlab.com/mirador1/mirador-service-python/-/blob/main/docs/ml/churn-prediction.md).
+- [Java feature doc](https://gitlab.com/iris-7/iris-service-java/-/blob/main/docs/ml/churn-prediction.md).
+- [Python feature doc](https://gitlab.com/iris-7/iris-service-python/-/blob/main/docs/ml/churn-prediction.md).
