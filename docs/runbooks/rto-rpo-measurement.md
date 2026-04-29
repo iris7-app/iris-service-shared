@@ -178,6 +178,64 @@ spec:
 
 ---
 
+## RPO writer pod manifest (2026-04-29 run)
+
+Direct-postgres writer (bypasses `iris-service-java`) — useful when
+the app deployment is broken or unavailable and you only need to
+validate the postgres durability side of RPO.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rpo-writer
+  namespace: infra
+  labels:
+    role: rpo-writer
+spec:
+  restartPolicy: Never
+  containers:
+    - name: writer
+      image: postgres:17-alpine
+      env:
+        - name: PGPASSWORD
+          value: demo123
+      command:
+        - /bin/sh
+        - -c
+        - |
+          DSN="postgresql://demo:demo123@postgresql.infra.svc.cluster.local:5432/customer-service?sslmode=disable"
+          RUN_ID=$(date +%s)
+          psql "$DSN" -c "CREATE TABLE IF NOT EXISTS rpo_test (id BIGSERIAL PRIMARY KEY, run_id BIGINT, seq INT, ts TIMESTAMPTZ DEFAULT NOW());" -q
+          attempted=0; ok=0; fail=0; i=0
+          end=$(($(date +%s) + 90))
+          while [ "$(date +%s)" -lt "$end" ]; do
+            i=$((i + 1)); attempted=$((attempted + 1))
+            iso=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)
+            if psql "$DSN" -c "INSERT INTO rpo_test (run_id, seq) VALUES ($RUN_ID, $i);" -q 2>/dev/null; then
+              ok=$((ok + 1))
+              [ $((i % 25)) -eq 0 ] && echo "$iso ok i=$i"
+            else
+              fail=$((fail + 1))
+              [ $((i % 25)) -eq 0 ] && echo "$iso fail i=$i"
+            fi
+            sleep 0.2
+          done
+          sleep 5
+          persisted=$(psql "$DSN" -t -c "SELECT count(*) FROM rpo_test WHERE run_id = $RUN_ID;" 2>/dev/null | tr -d ' ')
+          echo "RPO_DONE attempted=$attempted ok=$ok fail=$fail persisted=$persisted run_id=$RUN_ID"
+```
+
+Procedure :
+
+1. Apply this manifest after postgres is Ready.
+2. Wait for `ok i=100` in the writer's logs (`kubectl logs rpo-writer -n infra -f`).
+3. Trigger chaos : `kubectl delete pod postgresql-0 -n infra --grace-period=0 --force`.
+4. Wait for `RPO_DONE` line (writer auto-exits after the 90 s window + 5 s settle).
+5. RPO = `attempted - persisted`.
+
+---
+
 ## Result — 2026-04-28 run
 
 | Metric | Value | Notes |
@@ -196,6 +254,32 @@ for postgres failures (see `docs/PRODUCTION-READINESS.md`). The
 measured 7 s comfortably beats the target.
 
 ---
+
+## Result — 2026-04-29 RPO run
+
+| Metric | Value | Notes |
+|---|---|---|
+| **Cluster** | GKE Autopilot, `iris7-prod`, europe-west1 | Brought up via `bin/cluster/demo/up.sh` (after MR !16 fixed the `@@KEEP_IRIS_PROD@@` sentinel) |
+| **Workload** | Direct postgres `INSERT INTO rpo_test (run_id, seq) VALUES (...)` from a `postgres:17-alpine` pod via psql | NOT through `iris-service-java` — the deployment manifest still pointed at the pre-rebrand `iris-service/backend` image (fixed via MR !274). Direct-postgres write path validates the same RPO contract. |
+| **Pace** | 1 INSERT per ~200 ms (~5 attempts/s nominal ; observed ~3.7/s due to psql connection overhead) | |
+| **Run duration** | 90 s window (336 attempts completed before the writer timer expired) | |
+| **Chaos action** | `kubectl delete pod postgresql-0 --force --grace-period=0` at attempt #100 | Same pattern as the 2026-04-28 RTO run |
+| **First fail** | 2026-04-29 02:28:36 UTC (immediately after attempt #100) | The next 16 s the writer's psql connect blocked rather than retried |
+| **First recovery** | 2026-04-29 02:28:53 UTC (writer logs `ok i=125`) | |
+| **Observed RTO** | **17 s** | Higher than the 7 s pg_isready measurement — fresh-cluster cold cache + writer's per-iteration TCP-reconnect inflates timing vs. a long-lived probe pod |
+| **Total attempts** | 336 | (target was 450 ; truncated by the 90 s wall clock) |
+| **Persisted rows** | 335 (verified via `SELECT count(*) FROM rpo_test WHERE run_id = ...`) | |
+| **`fail` (writer-side)** | 1 | The single attempt whose psql connect did NOT eventually succeed against the recovering pod |
+| **RPO** | **1 lost write** | `attempted − persisted = 336 − 335 = 1`. Only the in-flight transaction at the chaos boundary was lost ; subsequent psql calls blocked on connection then succeeded after recovery. |
+
+For context : the Iris SLA documents an RPO target of "single-digit
+in-flight transactions" for postgres failures (informal, no public
+target document yet). Observed RPO of 1 transaction comfortably
+fits that envelope.
+
+The full writer log lives at `/tmp/rpo-run-2026-04-29.log` on the
+machine that ran the procedure (recreate via the manifest at
+`/tmp/rpo-direct-writer.yaml`).
 
 ## Limitations of this run
 
