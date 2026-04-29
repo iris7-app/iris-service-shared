@@ -20,7 +20,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"  # robust against location changes 
 TF_DIR="$REPO_ROOT/deploy/terraform/gcp"
 PROJECT_ID="${TF_VAR_project_id:-project-8d6ea68c-33ac-412b-8aa}"
 REGION="${TF_VAR_region:-europe-west1}"
-CLUSTER_NAME="${TF_VAR_cluster_name:-iris7-prod}"
+CLUSTER_NAME="${TF_VAR_cluster_name:-iris-prod}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "▶️  demo-up starting (project=$PROJECT_ID region=$REGION cluster=$CLUSTER_NAME)"
@@ -142,10 +142,15 @@ helm upgrade --install chaos-mesh chaos-mesh/chaos-mesh \
 # ADR-0025 — the cluster no longer exposes anything to the public internet.
 # Access is through bin/cluster/port-forward/prod.sh (kubectl port-forward) from the laptop.
 
-# 5. Apply the Argo CD Application — reconciles the app from main.
-kubectl apply -f "$REPO_ROOT/deploy/argocd/application.yaml"
+# 5. Argo CD reconciliation — the deploy/argocd/application.yaml manifest
+#    was deleted in 46a5887 (refactor(deploy): no public surface in prod, ADR-0025)
+#    when the cluster stopped exposing argocd publicly. The app is now applied
+#    manually post-bring-up via `kubectl apply -k deploy/kubernetes/overlays/gke`.
+#    Why : the cluster lifecycle (this script) and the app lifecycle (manifests)
+#    are decoupled in flat-α — let up.sh own ONLY the platform install. App
+#    deploy is a separate `kubectl apply` step the operator runs when ready.
 
-echo "⏳  waiting for Argo CD to sync the app (up to 5 min)..."
+echo "⏳  waiting for Argo CD core to be Available (up to 5 min)..."
 kubectl wait --for=condition=Available deployment --all -n argocd --timeout=5m || true
 
 # 6. Summary.

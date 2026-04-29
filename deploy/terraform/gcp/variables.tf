@@ -63,7 +63,7 @@ variable "region" {
 # =============================================================================
 # Role        : GKE cluster name — becomes the kubectl context name and
 #               appears in `gcloud container clusters get-credentials`.
-# Why         : Default `iris7-prod` matches the `GKE_CLUSTER` CI variable
+# Why         : Default `iris-prod` matches the `GKE_CLUSTER` CI variable
 #               in `.gitlab-ci.yml`, so `deploy:gke` can fetch credentials
 #               with `gcloud container clusters get-credentials $GKE_CLUSTER`
 #               without needing a separate `TF_VAR_cluster_name` override.
@@ -77,7 +77,7 @@ variable "region" {
 variable "cluster_name" {
   description = "Name of the GKE Autopilot cluster"
   type        = string
-  default     = "iris7-prod"
+  default     = "iris-prod"
   # Matches the GKE_CLUSTER CI variable so deploy:gke can fetch credentials
   # with `gcloud container clusters get-credentials $GKE_CLUSTER` without
   # needing a separate TF_VAR_cluster_name override.

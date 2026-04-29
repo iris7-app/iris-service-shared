@@ -57,6 +57,12 @@ catches drift on their bundled copy).
 | 0054 | Active | [Dual-export OTLP telemetry to GitLab Observability](0054-gitlab-observability-dual-export.md) |
 | 0058 | Accepted | [SLO/SLA defined as code via Sloth](0058-slo-sla-with-sloth.md) |
 | 0059 | Accepted | [Customer / Order / Product / OrderLine — domain data model](0059-customer-order-product-data-model.md) |
+| 0060 | Accepted | [0060. Cross-language ML inference via ONNX Runtime](0060-onnx-cross-language-ml-inference.md) |
+| 0061 | Accepted | [0061. Customer Churn Prediction — features, label, training pipeline](0061-customer-churn-prediction.md) |
+| 0062 | Accepted | [0062. MLflow registry + Kubernetes ConfigMap promotion pattern](0062-mlflow-registry-configmap-promotion.md) |
+| 0063 | Proposed | [0063. Order line refund state machine — transitions + audit](0063-order-line-refund-state-machine.md) |
+| 0064 | Rejected | [`Customer` domain rename — analysis, alternatives, migration plan](0064-customer-domain-rename.md) |
+| 0065 | Accepted | [GCE `SSD_TOTAL_GB` quota constrains GKE Autopilot demo cluster — escape valves documented](0065-gce-ssd-quota-blocks-autopilot-scaleup.md) |
 <!-- ADR-INDEX:END -->
 
 ## Adding a new cross-cutting ADR

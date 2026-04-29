@@ -14,7 +14,7 @@ Running `terraform apply` in this directory creates:
 | `google_compute_subnetwork.subnet`           | Subnet `iris-subnet` (10.0.0.0/20) with secondary ranges for GKE pods and services. | —                       | Free              |
 | `google_compute_global_address.private_ip_range` + `google_service_networking_connection` | Private Service Access peering — needed for Cloud SQL and Memorystore to have private IPs reachable from GKE. | —                       | Free              |
 | `google_compute_router` + `google_compute_router_nat` | Cloud NAT so private GKE nodes can reach the public internet (pull images, reach external APIs) without a public IP. | `AUTO_ONLY`             | ~$1/mo + $0.045/GB egress |
-| `google_container_cluster.autopilot`         | GKE Autopilot cluster (`iris7-prod`) — private nodes, public control plane, Workload Identity enabled, REGULAR release channel. | —                       | ~$0.10/hr control plane + per-pod billing |
+| `google_container_cluster.autopilot`         | GKE Autopilot cluster (`iris-prod`) — private nodes, public control plane, Workload Identity enabled, REGULAR release channel. | —                       | ~$0.10/hr control plane + per-pod billing |
 | `google_sql_database_instance.postgres`      | Cloud SQL Postgres 17, private IP only, PITR enabled, 7-day backups.    | `db-f1-micro`           | ~$7/mo (dev) · ~$50/mo (`db-n1-standard-1` for prod) |
 | `google_sql_database.iris` + `google_sql_user.app_user` | Application database `iris` and user `demo`.                        | —                       | Free              |
 | `google_service_account.sql_proxy`           | SA impersonated by the Cloud SQL Auth Proxy sidecar in the backend pod. | —                       | Free              |

@@ -102,11 +102,11 @@ done
 kubectl set resources statefulset argocd-application-controller -n argocd \
   --requests=cpu=100m,memory=256Mi --limits=cpu=500m,memory=512Mi
 
-# 4. Argo CD Application — reconciles the app from main.
-#    Per ADR-0025 the tree no longer ships any Ingress or cert-manager
-#    resources, so the reconcile is uneventful — no Degraded hints
-#    about missing ClusterIssuer like earlier iterations.
-kubectl apply -f "$REPO_ROOT/deploy/argocd/application.yaml"
+# 4. Argo CD Application — the manifest was deleted in 46a5887 (ADR-0025
+#    no public surface) and never replaced. Apply the app overlay manually
+#    via `kubectl apply -k deploy/kubernetes/overlays/gke` after up-fast.sh
+#    returns. Decoupling cluster bring-up (this script) from app deploy
+#    keeps the platform layer reusable across teardown/rebuild cycles.
 
 echo "⏳  waiting for iris-app pods..."
 # Give Argo CD ~2 min to pull + start.
