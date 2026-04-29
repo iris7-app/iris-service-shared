@@ -25,7 +25,20 @@ TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "▶️  demo-up starting (project=$PROJECT_ID region=$REGION cluster=$CLUSTER_NAME)"
 
-# 0. Pre-flight: enable required APIs idempotently (fast if already enabled).
+# 0a. Pre-flight: GCE quota headroom check (ADR-0065). Exits 1 here so the
+#     12-minute helm-wait failure mode discovered 2026-04-29 (cluster #4)
+#     becomes a 5-second pre-flight signal. Skip with SKIP_QUOTA_CHECK=1
+#     when re-running an in-progress bring-up that already passed once.
+if [ "${SKIP_QUOTA_CHECK:-0}" != "1" ]; then
+  if ! "$REPO_ROOT/bin/budget/budget.sh" quota >/dev/null 2>&1; then
+    "$REPO_ROOT/bin/budget/budget.sh" quota   # show full output so operator can act
+    echo
+    echo "⛔  Aborting bring-up — fix the quota first or re-run with SKIP_QUOTA_CHECK=1."
+    exit 1
+  fi
+fi
+
+# 0b. Pre-flight: enable required APIs idempotently (fast if already enabled).
 gcloud services enable \
   container.googleapis.com \
   secretmanager.googleapis.com \
