@@ -5,7 +5,7 @@
 # In CI, use TF_VAR_* environment variables instead of a tfvars file.
 #
 # Fill in exactly the three required variables; the rest have sensible
-# defaults in variables.tf (region = europe-west1, cluster_name = iris7-prod).
+# defaults in variables.tf (region = europe-west1, cluster_name = iris-prod).
 # =============================================================================
 
 # Required — GCP project ID (see CLAUDE.md for the iris project).
@@ -16,7 +16,7 @@ project_id   = "your-gcp-project-id"
 # DuckDNS record, Artifact Registry location) assumes this region.
 region       = "europe-west1"
 
-# Optional — defaults to iris7-prod. CI variable GKE_CLUSTER must match.
+# Optional — defaults to iris-prod. CI variable GKE_CLUSTER must match.
 cluster_name = "iris"
 
 # Required — public hostname served by the ingress. Must match the DuckDNS

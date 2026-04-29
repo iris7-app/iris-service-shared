@@ -20,7 +20,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"  # robust against location changes 
 TF_DIR="$REPO_ROOT/deploy/terraform/gcp"
 PROJECT_ID="${TF_VAR_project_id:-project-8d6ea68c-33ac-412b-8aa}"
 REGION="${TF_VAR_region:-europe-west1}"
-CLUSTER_NAME="${TF_VAR_cluster_name:-iris7-prod}"
+CLUSTER_NAME="${TF_VAR_cluster_name:-iris-prod}"
 TF_STATE_BUCKET="${TF_STATE_BUCKET:-${PROJECT_ID}-tf-state}"
 
 echo "▶️  demo-up starting (project=$PROJECT_ID region=$REGION cluster=$CLUSTER_NAME)"
