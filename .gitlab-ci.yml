@@ -1,0 +1,81 @@
+# =============================================================================
+# iris-service-shared CI — validates the infrastructure artefacts that
+# this repo owns. Per ~/.claude/CLAUDE.md scope rules : NO repo-specific
+# code — only cross-cutting infra.
+#
+# Universal jobs (Conventional Commits, shellcheck, ADR drift) are
+# included from iris-common — they apply to every repo identically.
+# Repo-specific jobs (terraform validate, k8s dry-run) live below.
+#
+# Anti-patterns to refuse (per CLAUDE.md "Surgical fixes, not allow_failure") :
+#   - allow_failure: true as a permanent shield → use `rules:` (when: never) instead
+#   - Skipping a section silently → must be visible in pipeline view
+# =============================================================================
+
+# Per ADR-0065 (iris-common) : route all jobs to macbook-local to
+# avoid the GitLab SaaS shared-runner ci_quota_exceeded class of
+# failures that bit the polyrepo on 2026-04-25 + 2026-04-29.
+default:
+  tags:
+    - macbook-local
+
+include:
+  # Conventional Commits — already universal
+  - project: 'iris-7/iris-common'
+    ref: main
+    file: 'ci-templates/conventional-commits.yml'
+  # Shellcheck on bin/**/*.sh — would have caught the @@KEEP_IRIS_PROD@@
+  # sentinel left by the iris rebrand (discovered 2026-04-29 RPO run)
+  - project: 'iris-7/iris-common'
+    ref: main
+    file: 'ci-templates/shellcheck.yml'
+  # ADR drift — fail when docs/adr/ has new ADRs the README hasn't
+  # been re-regenerated against
+  - project: 'iris-7/iris-common'
+    ref: main
+    file: 'ci-templates/adr-drift.yml'
+
+stages:
+  - validate
+  - test
+
+# ── terraform fmt + validate — repo-specific, lives only here because
+#    deploy/terraform/ is shared-only ─────────────────────────────────────
+terraform-validate:
+  stage: validate
+  image: hashicorp/terraform:1.10
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - deploy/terraform/**/*
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - deploy/terraform/**/*
+  script:
+    - cd deploy/terraform/gcp
+    - terraform fmt -check -recursive
+    - terraform init -backend=false -input=false
+    - terraform validate
+
+# ── K8s manifest dry-run — kubectl validates resource schemas ; CRD-bound
+#    resources (NetworkChaos / PodChaos / ExternalSecret) need a live
+#    cluster so are scoped out via the path filter ──────────────────────
+k8s-dry-run:
+  stage: test
+  image: bitnami/kubectl:1.32
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - deploy/kubernetes/**/*
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - deploy/kubernetes/**/*
+  script:
+    - |
+      set -e
+      for f in $(find deploy/kubernetes -name '*.yaml' -type f \
+                 | grep -vE '/(canary|external-secrets)/' \
+                 | grep -vE 'kustomization\.yaml$'); do
+        echo "▶ $f"
+        kubectl apply --dry-run=client -f "$f" -o yaml >/dev/null
+      done
