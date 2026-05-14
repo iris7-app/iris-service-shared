@@ -8,17 +8,19 @@
 ![Kustomize](https://img.shields.io/badge/Kustomize-overlays-326CE5?logo=kubernetes&logoColor=white)
 
 Shared **infrastructure + observability + CI templates + cross-cutting docs**
-for the [iris7](https://gitlab.com/iris7) project family. Submoduled
+for the [iris-7](https://gitlab.com/iris-7) project family. Submoduled
 into `iris-service-java` and `iris-service-python` under `infra/shared/`.
+(`iris-common` and `iris-ui` do NOT consume this — see [ADR-0060](https://gitlab.com/iris-7/iris-common/-/blob/main/docs/adr/0060-flat-vs-transitive-submodule-inheritance.md) flat α.)
 
 Part of **Iris**, an observability-first showcase across 7 facets.
-See [iris-service-java](https://gitlab.com/iris7/iris-service-java)
+See [iris-service-java](https://gitlab.com/iris-7/iris-service-java)
 for the master narrative + visual.
 
 ## What this proves
 
-- **Polyrepo coherence without monorepo lock-in** : 4 sibling repos share
-  this submodule for the 80% of infra that's truly identical (compose stack,
+- **Polyrepo coherence without monorepo lock-in** : 2 backend sibling
+  repos (java + python) share this submodule for the 80% of backend
+  infra that's truly identical (compose stack,
   K8s manifests, OTel config, CI templates, cross-cutting ADRs, SLO rules,
   Grafana dashboards). Submodule pin = no cascade breakage when shared moves.
 - **Operational hygiene scripts** : default-branch verification, runner
