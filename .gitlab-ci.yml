@@ -34,10 +34,19 @@ include:
   - project: 'iris-7/iris-common'
     ref: main
     file: 'ci-templates/adr-drift.yml'
+  # Auto-merge dev → main once the dev pipeline goes green. Added
+  # 2026-05-14 to align shared with the other 4 repos (java + python +
+  # ui + common) per ADR-0066. Before this, shared rolled directly on
+  # main ; now it follows the polyrepo standard : dev = working
+  # branch, main = auto-promoted on green.
+  - project: 'iris-7/iris-common'
+    ref: main
+    file: 'ci-templates/auto-merge-dev-to-main.yml'
 
 stages:
   - validate
   - test
+  - promote
 
 # ── terraform fmt + validate — repo-specific, lives only here because
 #    deploy/terraform/ is shared-only ─────────────────────────────────────
